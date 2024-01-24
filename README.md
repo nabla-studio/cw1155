@@ -314,7 +314,7 @@ IsApprovedForAllResponse {
 
 #### ContractInfo
 
-Access basic contract information, including the minter's address and the 
+Access basic contract information, including the minter's address, the owner's one and the 
 metadata URI.
 
 ```
@@ -323,8 +323,9 @@ ContractInfo {}
 Response:
 ```
 ContractInfoResponse {
-    "minter": "string", 
     "metadata_uri": "string"
+    "minter": "string", 
+    "owner": "string", 
 }
 ```
 
