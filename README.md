@@ -24,7 +24,8 @@ for standardized metadata integration.
 **Fields marked with * are mandatory.**
 
 *Note: All minting operations can only be performed by the designated `minter`.
-Registering operations can only be performed by the designated `owner`.
+Registering operations and changes to name and description fields can only be 
+performed by the designated `owner`.
 Batch operations are omitted since CosmWasm allows executing multiple messages 
 in the same transaction.*
 
@@ -39,7 +40,9 @@ Create a new contract instance for managing multiple token types.
 Instantiate {
     "metadata_uri*": "string",
     "minter": "string",
-    "owner": "string"
+    "owner": "string",
+    "name": "string",
+    "description": "string"
 }
 ```
 Parameters:
@@ -48,6 +51,8 @@ Parameters:
 to the message sender.
 - `owner`: Address authorized to registering operations for new tokens, 
 defaulting to the message sender.
+- `name`: A human-readable title for the collection.
+- `description`: A description for the collection.
 
 ---
 
@@ -193,6 +198,22 @@ Parameter:
 
 *NOTE: Only the current owner can change the owner address.*
 
+#### UpdateCollectionDetails
+
+Modify the name and description of the collection.
+
+```
+UpdateCollectionDetails {
+    "name": "string",
+    "description": "string",
+}
+```
+Parameters:
+- `name`: New name for the collection.
+- `description`: New description for the collection.
+
+*NOTE: Only the current owner can update the collection details.*
+
 ---
 
 ### Query
@@ -250,8 +271,8 @@ IsApprovedForAllResponse {
 
 #### ContractInfo
 
-Access basic contract information, including the minter's address, the owner's one and the 
-metadata URI.
+Access basic contract information, including the minter's address, the owner's 
+one, the name and the description for the collection and the metadata URI.
 
 ```
 ContractInfo {}
@@ -262,6 +283,8 @@ ContractInfoResponse {
     "metadata_uri": "string"
     "minter": "string", 
     "owner": "string", 
+    "name": "string",
+    "description": "string"
 }
 ```
 
