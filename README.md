@@ -24,6 +24,7 @@ for standardized metadata integration.
 **Fields marked with * are mandatory.**
 
 *Note: All minting operations can only be performed by the designated `minter`.
+Registering operations can only be performed by the designated `owner`.
 Batch operations are omitted since CosmWasm allows executing multiple messages 
 in the same transaction.*
 
@@ -37,13 +38,16 @@ Create a new contract instance for managing multiple token types.
 ```
 Instantiate {
     "uri*": "string",
-    "minter": "string"
+    "minter": "string",
+    "owner": "string"
 }
 ```
 Parameters:
 - `uri`: Base URI for metadata, immutable post-creation.
 - `minter`: Address authorized to minting operations on the tokens, defaulting
 to the message sender.
+- `owner`: Address authorized to registering operations for new tokens, 
+defaulting to the message sender.
 
 ---
 
@@ -64,6 +68,9 @@ Parameters:
 unlimited.
 - `is_transferrable`: Flag indicating if the token can be transferred 
 post-minting, defaulting to true.
+
+*Attempts to register tokens by addresses not authorized as owners will result
+in transaction failure.*
 
 <!-- #### BatchRegister
 ```
@@ -97,7 +104,8 @@ Parameters:
 - `msg`: Message for smart contract recipients ( which must implement the 
 `CW1155Receiver` ). If recipient is an EOA, `msg` should be `None`.
 
-*Minting beyond `max_supply` results in a transaction failure.*
+*Attempts to mint tokens beyond the max_supply limit or by addresses not 
+authorized as minters will result in transaction failure.*
 
 <!-- #### BatchMint
 ```
