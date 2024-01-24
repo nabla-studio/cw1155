@@ -1,85 +1,396 @@
-# CosmWasm Starter Pack
+# CW1155: Multiple Tokens Manager
 
-This is a template to build smart contracts in Rust to run inside a
-[Cosmos SDK](https://github.com/cosmos/cosmos-sdk) module on all chains that enable it.
-To understand the framework better, please read the overview in the
-[cosmwasm repo](https://github.com/CosmWasm/cosmwasm/blob/master/README.md),
-and dig into the [cosmwasm docs](https://www.cosmwasm.com).
-This assumes you understand the theory and just want to get coding.
+CW1155 is an innovative smart contract tailored for the efficient management of
+a wide range of token types within CosmWasm-enabled blockchains. 
+Drawing inspiration from Ethereum's ERC1155 and CosmWasm's CW1155 standards, 
+this contract introduces significant enhancements, broadening its functionality
+and utility. Its core objective is to facilitate the management of a variety of
+token types, including fungible, non-fungible, and semi-fungible tokens, 
+through a singular contract instance.
 
-## Creating a new repo from template
+### Features:
+- **Token Identifier**: Employs integers for seamless token identification, 
+thereby bypassing the complexities associated with string-based identification.
+- **MetadataURI**: MetadataURIs are attached to the contract instance, 
+supporting ID substitution by clients. Clients are mandated to replace `{id}` 
+within any URI with the actual token ID, facilitating the utilization of a 
+common on-chain string across numerous tokens by defining a single URI.
+- **Conformity to Metadata Schema**: Adheres to the 
+[ERC-1155 Metadata URI JSON Schema](https://eips.ethereum.org/EIPS/eip-1155)
+for standardized metadata integration.
 
-Assuming you have a recent version of Rust and Cargo installed
-(via [rustup](https://rustup.rs/)),
-then the following should get you a new repo to start a contract:
+## Messages
 
-Install [cargo-generate](https://github.com/ashleygwilliams/cargo-generate) and cargo-run-script.
-Unless you did that before, run this line now:
+**Fields marked with * are mandatory.**
 
-```sh
-cargo install cargo-generate --features vendored-openssl
-cargo install cargo-run-script
+*Note: All minting operations can only be performed by the designated `minter`.
+Batch operations are omitted since CosmWasm allows executing multiple messages 
+in the same transaction.*
+
+
+### Contract Initialization - Instantiate
+
+#### Instantiate
+
+Create a new contract instance for managing multiple token types.
+
+```
+Instantiate {
+    "uri*": "string",
+    "minter": "string"
+}
+```
+Parameters:
+- `uri`: Base URI for metadata, immutable post-creation.
+- `minter`: Address authorized to minting operations on the tokens, defaulting
+to the message sender.
+
+---
+
+### Token Management - Execute
+
+#### Register
+
+Register a new token type with specific attributes without immediate minting.
+
+```
+Register { 
+    "max_supply": "integer",
+    "is_transferrable": "boolean"
+}
+```
+Parameters:
+- `max_supply`: Cap on token quantity. If unspecified, the supply is deemed 
+unlimited.
+- `is_transferrable`: Flag indicating if the token can be transferred 
+post-minting, defaulting to true.
+
+<!-- #### BatchRegister
+```
+BatchRegister {
+    Vec<(max_supply, is_transferrable)>
+}
 ```
 
-Now, use it to create your new contract.
-Go to the folder in which you want to place it and run:
+`BatchRegister` message allows registering, in a batch, a set of new tokens in
+the contract. It expects an array of values, each which is made up of 
+`max_supply` and `is_transferable`, which coincides with the values expected by
+the `Register` message. Default is the same as for the `Register` message. -->
 
-**Latest**
 
-```sh
-cargo generate --git https://github.com/CosmWasm/cw-template.git --name PROJECT_NAME
+#### Mint
+
+Mint a specified quantity of a pre-registered token to a designated address.
+
+```
+Mint {
+    "to*": "string",
+    "id*": "integer",
+    "amount*": "integer",
+    "msg": "binary"
+}
+```
+Parameters:
+- `to`: Recipient address.
+- `id`: Token ID.
+- `amount`: Quantity to mint.
+- `msg`: Message for smart contract recipients ( which must implement the 
+`CW1155Receiver` ). If recipient is an EOA, `msg` should be `None`.
+
+*Minting beyond `max_supply` results in a transaction failure.*
+
+<!-- #### BatchMint
+```
+BatchMint {
+    to*,
+    batch*: Vec<(id*, amount*)>
+    msg
+}
+```
+`BatchMint` message allows minting, in a batch, a set of tokens to a user or 
+contract. It expects a recipient, a message, and an array of values, each of 
+which is made up of `id` and `amount` - this coincides with the values expected
+by the `Mint` message. This operation will fail if the new_supply (the one 
+considering also the newly minted tokens) will be grater than the max_supply 
+(if defined).
+-->
+
+#### Burn
+
+Burn a specified quantity of a token from a holder's address.
+
+```
+Burn {
+    "from*": "string",
+    "id*": "integer",
+    "amount*": "integer"
+}
+```
+Parameters:
+- `from`: Holder's address.
+- `id`: Token ID.
+- `amount`: Quantity to burn.
+
+Only tokens owned or authorized can be burned.
+
+<!-- #### BatchBurn
+
+```
+BatchBurn {
+    from*,
+    batch*: Vec<(id*, amount*)>
+}
+```
+`BatchBurn` message allows burning, in a batch, a set of tokens from a user or 
+contract. It expects a "sender" and an array of values, each of which is made 
+up of `id` and `amount` - this coincides with the values expected by the `Burn`
+message. This operation will fail if the amount of token to burn is 
+grater than the amount owned by the from address. -->
+
+#### TransferFrom
+
+Transfer a specified quantity of a token from one address to another.
+
+```
+TransferFrom {
+    "from*": "string",
+    "to*": "string",
+    "id*": "integer",
+    "amount*": "integer",
+    "msg": "binary"
+}
+``` 
+Parameters:
+- `from`: Sender's address.
+- `to`: Recipient's address.
+- `id`: Token ID.
+- `amount`: Quantity to transfer.
+- `msg`: Message for smart contract recipients ( which must implement the 
+`CW1155Receiver` ). If recipient is an EOA, `msg` should be `None`.
+
+*Transfers beyond ownership/unauthorized or non-transferrable tokens result in 
+failure.*
+
+<!-- #### BatchTransferFrom
+
+```
+BatchTransferFrom { 
+    from*, 
+    to*, 
+    batch*: Vec<( id*, amount* )>, 
+    msg 
+}
+```
+`BatchTransferFrom` message allows transferring, in a batch, a set of tokens 
+from a user or contract. It expects a sender, a recipient, a message and an 
+array of values, each of which is made up of `id` and `amount` - this 
+coincides with the values expected by the `TransferFrom` message. This 
+operation will fail if the amount of token to transfer is grater than the 
+amount owned by the from address.
+
+This operation will fail if the amount of token to transfer is grater than the
+amount owned by the from address or if the token feature `is_transferrable` is
+**false**. -->
+
+#### ApproveAll
+
+Grant an operator the authority to manage all of the sender's tokens.
+
+```
+ApproveAll {
+    "operator*": "string",
+    "expires": "timestamp"
+}
+``` 
+Parameters:
+- `operator`: Operator's address
+- `expires`: Approval expiration timestamp, defaulted to Never.
+
+*Approval scope includes all current and future tokens of the owner, while
+expires is valid.*
+
+#### RevokeAll
+
+Revoke an operator's authority to manage all of the sender's tokens.
+
+```
+RevokeAll {
+    "operator*": "string"
+}
+```
+Parameter:
+- `operator`: Operator's address.
+
+#### SetMinter
+
+Modify the address of who can perform minting operations.
+
+```
+SetMinter {
+    "minter*": "string"
+}
+```
+Parameter:
+- `minter`: New minter's address.
+
+*NOTE: Only the current minter can change the minter address.*
+
+---
+
+### Query
+
+#### Balance
+
+Retrieve the token balance for a specific owner and token ID.
+
+```
+Balance { 
+    "owner*": "string", 
+    "id*": "integer"
+}
+``` 
+Response:
+```
+BalanceResponse {
+    "amount": "integer"
+}
 ```
 
-For cloning minimal code repo:
+#### BatchBalance
 
-```sh
-cargo generate --git https://github.com/CosmWasm/cw-template.git --name PROJECT_NAME -d minimal=true
+Query the token balances for multiple IDs associated with a single owner.
+
+```
+BatchBalance { 
+    "owner*": "string", 
+    "id*": "array[integer]"
+}
+```
+Response:
+```
+BatchBalanceResponse {
+    "amount": "array[integer]"
+}
 ```
 
-You will now have a new folder called `PROJECT_NAME` (I hope you changed that to something else)
-containing a simple working contract and build system that you can customize.
+#### IsApprovedForAll
 
-## Create a Repo
+Check if an operator is authorized to manage all tokens of a given owner.
 
-After generating, you have a initialized local git repo, but no commits, and no remote.
-Go to a server (eg. github) and create a new upstream repo (called `YOUR-GIT-URL` below).
-Then run the following:
-
-```sh
-# this is needed to create a valid Cargo.lock file (see below)
-cargo check
-git branch -M main
-git add .
-git commit -m 'Initial Commit'
-git remote add origin YOUR-GIT-URL
-git push -u origin main
+```
+IsApprovedForAll { 
+    "owner*": "string", 
+    "operator*": "string"
+}
+``` 
+Response:
+```
+IsApprovedForAllResponse {
+    "approved": "boolean"
+}
 ```
 
-## CI Support
+#### ContractInfo
 
-We have template configurations for both [GitHub Actions](.github/workflows/Basic.yml)
-and [Circle CI](.circleci/config.yml) in the generated project, so you can
-get up and running with CI right away.
+Access basic contract information, including the minter's address and the 
+metadata URI.
 
-One note is that the CI runs all `cargo` commands
-with `--locked` to ensure it uses the exact same versions as you have locally. This also means
-you must have an up-to-date `Cargo.lock` file, which is not auto-generated.
-The first time you set up the project (or after adding any dep), you should ensure the
-`Cargo.lock` file is updated, so the CI will test properly. This can be done simply by
-running `cargo check` or `cargo unit-test`.
+```
+ContractInfo {}
+```
+Response:
+```
+ContractInfoResponse {
+    "minter": "string", 
+    "metadata_uri": "string"
+}
+```
 
-## Using your project
+#### TokenInfo
 
-Once you have your custom repo, you should check out [Developing](./Developing.md) to explain
-more on how to run tests and develop code. Or go through the
-[online tutorial](https://docs.cosmwasm.com/) to get a better feel
-of how to develop.
+Fetch details about a specific token, including its transferability, maximum 
+supply, burned quantity, and current supply.
 
-[Publishing](./Publishing.md) contains useful information on how to publish your contract
-to the world, once you are ready to deploy it on a running blockchain. And
-[Importing](./Importing.md) contains information about pulling in other contracts or crates
-that have been published.
+```
+TokenInfo {
+    "id*": "integer",
+}
+```
+Response:
+```
+TokenInfoResponse {
+    "is_trasferrable": "boolean",
+    "max_supply": "integer",
+    "burned": "integer",
+    "current_supply": "integer"
+}
+```
 
-Please replace this README file with information about your specific project. You can keep
-the `Developing.md` and `Publishing.md` files as useful references, but please set some
-proper description in the README.
+<!-- #### MaxSupply
+```
+MaxSupply {
+    id*
+}
+```
+`MaxSupply` message queries the `max_supply` value for a token. 
+It expects the following parameter:
+- `id`: An integer representing the ID of the token to query.
+
+#### Burned
+```
+Burned {
+    id*
+}
+```
+`Burned` message queries the quantity of burned elements for a token. 
+It expects the following parameter:
+- `id`: An integer representing the ID of the token to query.
+
+#### CurrentSupply
+```
+CurrentSupply {
+    id*
+}
+```
+`CurrentSupply` message queries the amount of tokens available at the moment
+of the query. It must be equal to the sum of the balances for such token, and,
+at the same time, to the quantity of minted elements minus the quantity of 
+burned elements.
+It expects the following parameter:
+- `id`: An integer representing the ID of the token to query.
+
+#### IsTransferrable
+```
+IsTransferrable {
+    id*
+}
+```
+`IsTransferrable` message queries if a token is transferrable or not. 
+It expects the following parameter:
+- `id`: An integer representing the ID of the token to query. -->
+
+---
+
+## Receiver
+
+Contracts intending to receive CW1155 tokens MUST implement the 
+`Cw1155ReceiveMsg`.
+<!-- and `Cw1155BatchReceiveMsg`. -->
+This interface is generally *not* integrated into CW1155 contracts directly.
+
+#### Cw1155ReceiveMsg
+
+Handle the receipt of single token transfers or mints.
+```
+Cw1155ReceiveMsg {
+    "operator": "string",
+    "from": "string",
+    "token_id": "integer",
+    "amount": "integer",
+    "msg": "binary"
+}
+```
+
+<!-- - `Cw1155BatchReceiveMsg { operator, from, batch: Vec<( id, amount )>, msg }` -
+Is designed to handle batched transfer through the `BatchTransferFrom` and 
+`BatchMint` messages. It works as the `Cw1155ReceiveMsg`. -->
