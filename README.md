@@ -41,8 +41,8 @@ Instantiate {
     "metadata_uri*": "string",
     "minter": "string",
     "owner": "string",
-    "name": "string",
-    "description": "string"
+    "name*": "string",
+    "description*": "string"
 }
 ```
 Parameters:
