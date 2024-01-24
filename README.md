@@ -243,6 +243,20 @@ Parameter:
 
 *NOTE: Only the current minter can change the minter address.*
 
+#### SetOwner
+
+Modify the address of who can perform registering operations.
+
+```
+SetOwner {
+    "owner*": "string"
+}
+```
+Parameter:
+- `owner`: New owner's address.
+
+*NOTE: Only the current owner can change the owner address.*
+
 ---
 
 ### Query
