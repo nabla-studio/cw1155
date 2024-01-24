@@ -72,19 +72,6 @@ post-minting, defaulting to true.
 *Attempts to register tokens by addresses not authorized as owners will result
 in transaction failure.*
 
-<!-- #### BatchRegister
-```
-BatchRegister {
-    Vec<(max_supply, is_transferrable)>
-}
-```
-
-`BatchRegister` message allows registering, in a batch, a set of new tokens in
-the contract. It expects an array of values, each which is made up of 
-`max_supply` and `is_transferable`, which coincides with the values expected by
-the `Register` message. Default is the same as for the `Register` message. -->
-
-
 #### Mint
 
 Mint a specified quantity of a pre-registered token to a designated address.
@@ -107,22 +94,6 @@ Parameters:
 *Attempts to mint tokens beyond the max_supply limit or by addresses not 
 authorized as minters will result in transaction failure.*
 
-<!-- #### BatchMint
-```
-BatchMint {
-    to*,
-    batch*: Vec<(id*, amount*)>
-    msg
-}
-```
-`BatchMint` message allows minting, in a batch, a set of tokens to a user or 
-contract. It expects a recipient, a message, and an array of values, each of 
-which is made up of `id` and `amount` - this coincides with the values expected
-by the `Mint` message. This operation will fail if the new_supply (the one 
-considering also the newly minted tokens) will be grater than the max_supply 
-(if defined).
--->
-
 #### Burn
 
 Burn a specified quantity of a token from a holder's address.
@@ -140,20 +111,6 @@ Parameters:
 - `amount`: Quantity to burn.
 
 Only tokens owned or authorized can be burned.
-
-<!-- #### BatchBurn
-
-```
-BatchBurn {
-    from*,
-    batch*: Vec<(id*, amount*)>
-}
-```
-`BatchBurn` message allows burning, in a batch, a set of tokens from a user or 
-contract. It expects a "sender" and an array of values, each of which is made 
-up of `id` and `amount` - this coincides with the values expected by the `Burn`
-message. This operation will fail if the amount of token to burn is 
-grater than the amount owned by the from address. -->
 
 #### TransferFrom
 
@@ -178,27 +135,6 @@ Parameters:
 
 *Transfers beyond ownership/unauthorized or non-transferrable tokens result in 
 failure.*
-
-<!-- #### BatchTransferFrom
-
-```
-BatchTransferFrom { 
-    from*, 
-    to*, 
-    batch*: Vec<( id*, amount* )>, 
-    msg 
-}
-```
-`BatchTransferFrom` message allows transferring, in a batch, a set of tokens 
-from a user or contract. It expects a sender, a recipient, a message and an 
-array of values, each of which is made up of `id` and `amount` - this 
-coincides with the values expected by the `TransferFrom` message. This 
-operation will fail if the amount of token to transfer is grater than the 
-amount owned by the from address.
-
-This operation will fail if the amount of token to transfer is grater than the
-amount owned by the from address or if the token feature `is_transferrable` is
-**false**. -->
 
 #### ApproveAll
 
@@ -349,56 +285,12 @@ TokenInfoResponse {
 }
 ```
 
-<!-- #### MaxSupply
-```
-MaxSupply {
-    id*
-}
-```
-`MaxSupply` message queries the `max_supply` value for a token. 
-It expects the following parameter:
-- `id`: An integer representing the ID of the token to query.
-
-#### Burned
-```
-Burned {
-    id*
-}
-```
-`Burned` message queries the quantity of burned elements for a token. 
-It expects the following parameter:
-- `id`: An integer representing the ID of the token to query.
-
-#### CurrentSupply
-```
-CurrentSupply {
-    id*
-}
-```
-`CurrentSupply` message queries the amount of tokens available at the moment
-of the query. It must be equal to the sum of the balances for such token, and,
-at the same time, to the quantity of minted elements minus the quantity of 
-burned elements.
-It expects the following parameter:
-- `id`: An integer representing the ID of the token to query.
-
-#### IsTransferrable
-```
-IsTransferrable {
-    id*
-}
-```
-`IsTransferrable` message queries if a token is transferrable or not. 
-It expects the following parameter:
-- `id`: An integer representing the ID of the token to query. -->
-
 ---
 
 ## Receiver
 
 Contracts intending to receive CW1155 tokens MUST implement the 
 `Cw1155ReceiveMsg`.
-<!-- and `Cw1155BatchReceiveMsg`. -->
 This interface is generally *not* integrated into CW1155 contracts directly.
 
 #### Cw1155ReceiveMsg
@@ -413,7 +305,3 @@ Cw1155ReceiveMsg {
     "msg": "binary"
 }
 ```
-
-<!-- - `Cw1155BatchReceiveMsg { operator, from, batch: Vec<( id, amount )>, msg }` -
-Is designed to handle batched transfer through the `BatchTransferFrom` and 
-`BatchMint` messages. It works as the `Cw1155ReceiveMsg`. -->
