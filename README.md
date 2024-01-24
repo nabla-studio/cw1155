@@ -37,13 +37,13 @@ Create a new contract instance for managing multiple token types.
 
 ```
 Instantiate {
-    "uri*": "string",
+    "metadata_uri*": "string",
     "minter": "string",
     "owner": "string"
 }
 ```
 Parameters:
-- `uri`: Base URI for metadata, immutable post-creation.
+- `metadata_uri`: Base URI for metadata, immutable post-creation.
 - `minter`: Address authorized to minting operations on the tokens, defaulting
 to the message sender.
 - `owner`: Address authorized to registering operations for new tokens, 
