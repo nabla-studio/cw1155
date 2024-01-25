@@ -269,17 +269,17 @@ IsApprovedForAllResponse {
 }
 ```
 
-#### ContractInfo
+#### Config
 
 Access basic contract information, including the minter's address, the owner's 
 one, the name and the description for the collection and the metadata URI.
 
 ```
-ContractInfo {}
+Config {}
 ```
 Response:
 ```
-ContractInfoResponse {
+ConfigResponse {
     "metadata_uri": "string"
     "minter": "string", 
     "owner": "string", 
