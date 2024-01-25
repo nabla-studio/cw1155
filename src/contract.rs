@@ -32,6 +32,7 @@ pub fn instantiate(
         .map_or(Ok(info.sender), |o| deps.api.addr_validate(&o))?;
 
     let contract_info = Config {
+        registered_tokens: 0,
         metadata_uri: msg.metadata_uri,
         minter: Some(minter),
         owner: Some(owner),

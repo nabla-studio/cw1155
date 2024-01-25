@@ -271,8 +271,9 @@ IsApprovedForAllResponse {
 
 #### Config
 
-Access basic contract information, including the minter's address, the owner's 
-one, the name and the description for the collection and the metadata URI.
+Access basic contract information including the metadata URI, the current 
+number of registered tokens, the minter's address, the owner's one, the name 
+and the description for the collection.
 
 ```
 Config {}
@@ -280,6 +281,7 @@ Config {}
 Response:
 ```
 ConfigResponse {
+    "registered_tokens": "integer",
     "metadata_uri": "string"
     "minter": "string", 
     "owner": "string", 

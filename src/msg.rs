@@ -39,8 +39,12 @@ pub enum QueryMsg {
 /// ContractInfoResponse holds basic contract information.
 #[cw_serde]
 pub struct ContractInfoResponse {
+    /// Number of registered tokens.
+    pub registered_tokens: u128,
+
     /// Base URI for contract metadata.
     pub metadata_uri: String,
+
     /// Authorized minter address. None implies minting is disabled.
     pub minter: Option<String>,
 

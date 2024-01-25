@@ -39,6 +39,7 @@ fn get_config() {
     assert_eq!(
         info,
         ContractInfoResponse {
+            registered_tokens: 0,
             metadata_uri,
             minter: Some(minter.to_string()),
             owner: Some(owner.to_string()),
@@ -80,6 +81,7 @@ fn get_config_empty_owner_and_minter() {
     assert_eq!(
         info,
         ContractInfoResponse {
+            registered_tokens: 0,
             metadata_uri,
             minter: Some(sender.to_string()),
             owner: Some(sender.to_string()),
