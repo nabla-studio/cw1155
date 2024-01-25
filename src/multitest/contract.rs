@@ -2,7 +2,7 @@ use cosmwasm_std::{Addr, StdResult};
 use cw_multi_test::{App, ContractWrapper, Executor};
 
 use crate::contract::{execute, instantiate, query};
-use crate::msg::InstantiateMsg;
+use crate::msg::{ContractInfoResponse, InstantiateMsg, QueryMsg};
 
 pub struct Cw1155(Addr);
 
@@ -49,6 +49,12 @@ impl Cw1155 {
         )
         .map(Cw1155)
         .map_err(|err| err.downcast().unwrap())
+    }
+
+    #[track_caller]
+    pub fn query_contract_info(&self, app: &App) -> StdResult<ContractInfoResponse> {
+        app.wrap()
+            .query_wasm_smart(self.0.clone(), &QueryMsg::ContractInfo {})
     }
 }
 
