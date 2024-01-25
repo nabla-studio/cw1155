@@ -40,7 +40,7 @@ pub enum QueryMsg {
 #[cw_serde]
 pub struct ContractInfoResponse {
     /// Number of registered tokens.
-    pub registered_tokens: u128,
+    pub registered_tokens: u64,
 
     /// Base URI for contract metadata.
     pub metadata_uri: String,
