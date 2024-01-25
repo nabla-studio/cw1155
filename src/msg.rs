@@ -31,13 +31,25 @@ pub enum ExecuteMsg {
 #[cw_serde]
 #[derive(QueryResponses)]
 pub enum QueryMsg {
-    // GetCount returns the current count as a json-encoded number
-    #[returns(GetCountResponse)]
-    GetCount {},
+    /// ContractInfo returns the current information about the contract and the
+    /// related tokens collection.
+    #[returns(ContractInfoResponse)]
+    ContractInfo {},
 }
-
-// We define a custom struct for each query response
+/// ContractInfoResponse holds basic contract information.
 #[cw_serde]
-pub struct GetCountResponse {
-    pub count: i32,
+pub struct ContractInfoResponse {
+    /// Base URI for contract metadata.
+    pub metadata_uri: String,
+    /// Authorized minter address. None implies minting is disabled.
+    pub minter: Option<String>,
+
+    /// Authorized owner address. None implies changes are locked.
+    pub owner: Option<String>,
+
+    /// Collection title.
+    pub name: String,
+
+    /// Collection description.
+    pub description: String,
 }
