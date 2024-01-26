@@ -5,7 +5,7 @@ use cw2::set_contract_version;
 
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{Config, CONFIG};
+use crate::state::{Config, CONFIG, REGISTERED_TOKENS};
 use crate::{execute, query};
 
 // version info for migration info
@@ -31,8 +31,7 @@ pub fn instantiate(
         .owner
         .map_or(Ok(info.sender), |o| deps.api.addr_validate(&o))?;
 
-    let contract_info = Config {
-        registered_tokens: 0,
+    let config = Config {
         metadata_uri: msg.metadata_uri,
         minter: Some(minter),
         owner: Some(owner),
@@ -44,7 +43,8 @@ pub fn instantiate(
     // in this case the contract cannot be used. No token can be registered
     // and/or no token can be minted.
 
-    CONFIG.save(deps.storage, &contract_info)?;
+    REGISTERED_TOKENS.save(deps.storage, &0)?;
+    CONFIG.save(deps.storage, &config)?;
 
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
 
