@@ -1,8 +1,9 @@
-use cosmwasm_std::{Addr, StdResult};
+use cosmwasm_std::{Addr, StdResult, Uint128};
 use cw_multi_test::{App, ContractWrapper, Executor};
 
 use crate::contract::{execute, instantiate, query};
-use crate::msg::{ContractInfoResponse, InstantiateMsg, QueryMsg};
+use crate::msg::{ContractInfoResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
+use crate::ContractError;
 
 pub struct Cw1155(Addr);
 
@@ -49,6 +50,30 @@ impl Cw1155 {
         )
         .map(Cw1155)
         .map_err(|err| err.downcast().unwrap())
+    }
+
+    #[track_caller]
+    pub fn register_token(
+        &self,
+        app: &mut App,
+        sender: &Addr,
+        max_supply: impl Into<Option<Uint128>>,
+        is_transferrable: impl Into<Option<bool>>,
+    ) -> Result<(), ContractError> {
+        let max_supply = max_supply.into();
+        let is_transferrable = is_transferrable.into();
+
+        app.execute_contract(
+            sender.clone(),
+            self.0.clone(),
+            &ExecuteMsg::Register {
+                max_supply,
+                is_transferrable,
+            },
+            &[],
+        )
+        .map_err(|err| err.downcast().unwrap())
+        .map(|_| ())
     }
 
     #[track_caller]

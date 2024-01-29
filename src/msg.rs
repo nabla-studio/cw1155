@@ -1,4 +1,5 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
+use cosmwasm_std::Uint128;
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -24,8 +25,12 @@ pub struct InstantiateMsg {
 
 #[cw_serde]
 pub enum ExecuteMsg {
-    Increment {},
-    Reset { count: i32 },
+    Register {
+        /// Maximum number of elements of tokens that can be minted.
+        max_supply: Option<Uint128>,
+        /// Flag indicating whether token is transferrable after minting or not.
+        is_transferrable: Option<bool>,
+    },
 }
 
 #[cw_serde]

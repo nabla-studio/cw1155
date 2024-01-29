@@ -11,6 +11,8 @@ through a singular contract instance.
 ### Features:
 - **Token Identifier**: Employs integers for seamless token identification, 
 thereby bypassing the complexities associated with string-based identification.
+IDs starts from 1 and the maximum number of tokens registrable for each 
+contract instance is 2^64 -1.
 - **MetadataURI**: MetadataURIs are attached to the contract instance, 
 supporting ID substitution by clients. Clients are mandated to replace `{id}` 
 within any URI with the actual token ID, facilitating the utilization of a 
@@ -70,7 +72,7 @@ Register {
 ```
 Parameters:
 - `max_supply`: Cap on token quantity. If unspecified, the supply is deemed 
-unlimited.
+unlimited. Max supply cannot be increased after registration.
 - `is_transferrable`: Flag indicating if the token can be transferred 
 post-minting, defaulting to true.
 

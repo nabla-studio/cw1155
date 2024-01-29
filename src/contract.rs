@@ -59,8 +59,10 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
-        ExecuteMsg::Increment {} => execute::increment(deps),
-        ExecuteMsg::Reset { count } => execute::reset(deps, info, count),
+        ExecuteMsg::Register {
+            max_supply,
+            is_transferrable,
+        } => execute::register(deps, info, max_supply, is_transferrable),
     }
 }
 
