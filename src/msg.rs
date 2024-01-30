@@ -1,5 +1,6 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Binary, Uint128};
+use cw_utils::Expiration;
 
 use crate::state::TokenInfo;
 
@@ -46,6 +47,22 @@ pub enum ExecuteMsg {
         /// Message for smart contract recipients.
         msg: Option<Binary>,
     },
+
+    /// Approve a grants to the operator to operate on all tokens owned by the
+    /// sender of the request.
+    ApproveAll {
+        /// Address of the operator.
+        operator: String,
+        /// Expiration of the grant.
+        expiration: Option<Expiration>,
+    },
+
+    /// Revoke a previously approved grant to the operator to operate on all
+    /// tokens owned by the sender of the request.
+    RevokeAll {
+        /// Address of the operator.
+        operator: String,
+    },
 }
 
 #[cw_serde]
@@ -64,6 +81,11 @@ pub enum QueryMsg {
     /// token.
     #[returns(BalanceResponse)]
     Balance { owner: String, id: u64 },
+
+    /// IsApprovedForAll returns if an operator is approved for managing all
+    /// the tokens owned by an owner.
+    #[returns(BalanceResponse)]
+    IsApprovedForAll { owner: String, operator: String },
 }
 /// ContractInfoResponse holds basic contract information.
 #[cw_serde]
@@ -91,4 +113,12 @@ pub struct ContractInfoResponse {
 #[cw_serde]
 pub struct BalanceResponse {
     pub amount: Uint128,
+}
+
+/// IsApprovedForAllResponse holds the expiration indicating (if exists) the
+/// expiring date for the grant.
+#[cw_serde]
+pub struct IsApprovedForAllResponse {
+    // None implies that the grant is not present.
+    pub expiration: Option<Expiration>,
 }

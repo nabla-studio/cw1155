@@ -1,5 +1,6 @@
 // Import necessary dependencies.
-use cosmwasm_std::{Addr, Binary, DepsMut, MessageInfo, Response, Uint128};
+use cosmwasm_std::{Addr, Binary, DepsMut, Env, MessageInfo, Response, Uint128};
+use cw_utils::Expiration;
 
 use crate::{
     helpers::{
@@ -7,7 +8,7 @@ use crate::{
         update_balance, BalanceAction,
     },
     receiver::Cw1155ReceiveMsg,
-    state::{TokenInfo, TOKENS},
+    state::{approvals, Approval, TokenInfo, TOKENS},
     ContractError,
 };
 
@@ -134,4 +135,66 @@ fn exec_transfer(
 
     // If everything went well, returns an empty response.
     Ok(())
+}
+
+/// Grants the operator to operate on all tokens owned by the info.sender.
+pub fn approve_all(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    operator: String,
+    expiration: Option<Expiration>,
+) -> Result<Response, ContractError> {
+    // Retrieves the expiration.
+    let expiration = expiration.unwrap_or_default();
+
+    // Validate the operator's address.
+    let operator_addr = deps.api.addr_validate(&operator)?;
+
+    // Check if expiration already expired.
+    if expiration.is_expired(&env.block) {
+        return Err(ContractError::Expired);
+    }
+
+    // Save the new approval.
+    approvals().save(
+        deps.storage,
+        (info.sender.clone(), operator_addr.clone()),
+        &Approval {
+            owner: info.sender.clone(),
+            operator: operator_addr,
+            expiration,
+        },
+    )?;
+
+    // Prepare the response.
+    let resp = Response::new()
+        .add_attribute("action", "approve_all")
+        .add_attribute("owner", &info.sender)
+        .add_attribute("operator", &operator)
+        .add_attribute("expiration", expiration.to_string());
+
+    Ok(resp)
+}
+
+/// Revoke a grants to the operator to operate on all tokens owned by the
+/// info.sender.
+pub fn revoke_all(
+    deps: DepsMut,
+    info: MessageInfo,
+    operator: String,
+) -> Result<Response, ContractError> {
+    // Validate the operator's address.
+    let operator_addr = deps.api.addr_validate(&operator)?;
+
+    // Remove a previous grant.
+    approvals().remove(deps.storage, (info.sender.clone(), operator_addr))?;
+
+    // Prepare the response.
+    let resp = Response::default()
+        .add_attribute("action", "revoke_all")
+        .add_attribute("owner", &info.sender)
+        .add_attribute("operator", &operator);
+
+    Ok(resp)
 }

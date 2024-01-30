@@ -1,8 +1,8 @@
 use cosmwasm_std::{Deps, StdResult, Uint128};
 
 use crate::{
-    msg::{BalanceResponse, ContractInfoResponse},
-    state::{balances, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
+    msg::{BalanceResponse, ContractInfoResponse, IsApprovedForAllResponse},
+    state::{approvals, balances, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
 };
 
 pub fn query_config(deps: Deps) -> StdResult<ContractInfoResponse> {
@@ -35,4 +35,19 @@ pub fn query_balance(deps: Deps, owner: String, id: u64) -> StdResult<BalanceRes
     Ok(BalanceResponse {
         amount: balance.amount,
     })
+}
+
+pub fn query_approved_for_all(
+    deps: Deps,
+    owner: String,
+    operator: String,
+) -> StdResult<IsApprovedForAllResponse> {
+    let owner_addr = deps.api.addr_validate(&owner)?;
+    let operator_addr = deps.api.addr_validate(&operator)?;
+
+    let expiration = approvals()
+        .may_load(deps.storage, (owner_addr.clone(), operator_addr.clone()))?
+        .map(|approval| approval.expiration);
+
+    Ok(IsApprovedForAllResponse { expiration })
 }

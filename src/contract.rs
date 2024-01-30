@@ -54,7 +54,7 @@ pub fn instantiate(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(
     deps: DepsMut,
-    _env: Env,
+    env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
@@ -69,6 +69,11 @@ pub fn execute(
             amount,
             msg,
         } => execute::mint(deps, info, to, id, amount, msg),
+        ExecuteMsg::ApproveAll {
+            operator,
+            expiration,
+        } => execute::approve_all(deps, env, info, operator, expiration),
+        ExecuteMsg::RevokeAll { operator } => execute::revoke_all(deps, info, operator),
     }
 }
 
@@ -78,5 +83,8 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::ContractInfo {} => to_json_binary(&query::query_config(deps)?),
         QueryMsg::TokenInfo { id } => to_json_binary(&query::query_token_info(deps, id)?),
         QueryMsg::Balance { owner, id } => to_json_binary(&query::query_balance(deps, owner, id)?),
+        QueryMsg::IsApprovedForAll { owner, operator } => {
+            to_json_binary(&query::query_approved_for_all(deps, owner, operator)?)
+        }
     }
 }

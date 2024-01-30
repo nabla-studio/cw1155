@@ -2,6 +2,7 @@ use cosmwasm_schema::cw_serde;
 
 use cosmwasm_std::{Addr, Uint128};
 use cw_storage_plus::{Index, IndexList, IndexedMap, Item, Map, MultiIndex};
+use cw_utils::Expiration;
 
 #[cw_serde]
 pub struct Config {
@@ -80,4 +81,42 @@ pub fn balances<'a>() -> IndexedMap<'a, (Addr, u64), Balance, BalancesIndexes<'a
         ),
     };
     IndexedMap::new("balances", indexes)
+}
+
+#[cw_serde]
+pub struct Approval {
+    /// Owner of the token.
+    pub owner: Addr,
+    /// Operator for the token.
+    pub operator: Addr,
+    /// Expiration time or block of the approval.
+    pub expiration: Expiration,
+}
+
+pub struct ApprovalsIndexes<'a> {
+    pub owner_index: MultiIndex<'a, Addr, Approval, (Addr, Addr)>,
+    pub operator_index: MultiIndex<'a, Addr, Approval, (Addr, Addr)>,
+}
+
+impl<'a> IndexList<Approval> for ApprovalsIndexes<'a> {
+    fn get_indexes(&'_ self) -> Box<dyn Iterator<Item = &'_ dyn Index<Approval>> + '_> {
+        let v: Vec<&dyn Index<Approval>> = vec![&self.owner_index, &self.operator_index];
+        Box::new(v.into_iter())
+    }
+}
+
+pub fn approvals<'a>() -> IndexedMap<'a, (Addr, Addr), Approval, ApprovalsIndexes<'a>> {
+    let indexes = ApprovalsIndexes {
+        owner_index: MultiIndex::new(
+            |_, approval: &Approval| approval.owner.clone(),
+            "approvals",
+            "approvals__owner",
+        ),
+        operator_index: MultiIndex::new(
+            |_, approval: &Approval| approval.operator.clone(),
+            "approvals",
+            "approvals__operator",
+        ),
+    };
+    IndexedMap::new("approvals", indexes)
 }

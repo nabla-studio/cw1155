@@ -150,15 +150,15 @@ Grant an operator the authority to manage all of the sender's tokens.
 ```
 ApproveAll {
     "operator*": "string",
-    "expires": "timestamp"
+    "expiration": "timestamp"
 }
 ``` 
 Parameters:
 - `operator`: Operator's address
-- `expires`: Approval expiration timestamp, defaulted to Never.
+- `expiration`: Approval expiration timestamp, defaulted to Never.
 
 *Approval scope includes all current and future tokens of the owner, while
-expires is valid.*
+expiration is valid.*
 
 #### RevokeAll
 
@@ -279,7 +279,7 @@ IsApprovedForAll {
 Response:
 ```
 IsApprovedForAllResponse {
-    "approved": "boolean"
+    "approved": Option<"expiration">
 }
 ```
 

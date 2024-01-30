@@ -39,6 +39,9 @@ pub enum ContractError {
     #[error("Invalid token ID. No token with that ID was already registered")]
     InvalidToken,
 
+    #[error("The provided expiration has already expired")]
+    Expired,
+
     #[error("User has insufficient balance for token with ID {id}: required {required}, available {available}")]
     InsufficientFunds {
         id: u64,
