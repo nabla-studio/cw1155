@@ -1,5 +1,7 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use cosmwasm_std::Uint128;
+use cosmwasm_std::{Binary, Uint128};
+
+use crate::state::TokenInfo;
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -25,11 +27,24 @@ pub struct InstantiateMsg {
 
 #[cw_serde]
 pub enum ExecuteMsg {
+    /// Register a new token.
     Register {
         /// Maximum number of elements of tokens that can be minted.
         max_supply: Option<Uint128>,
         /// Flag indicating whether token is transferrable after minting or not.
         is_transferrable: Option<bool>,
+    },
+
+    /// Mint an already registered token.
+    Mint {
+        /// Address of the recipient.
+        to: String,
+        /// ID of the token to mint.
+        id: u64,
+        /// Amount token elements to mint.
+        amount: Uint128,
+        /// Message for smart contract recipients.
+        msg: Option<Binary>,
     },
 }
 
@@ -40,6 +55,15 @@ pub enum QueryMsg {
     /// related tokens collection.
     #[returns(ContractInfoResponse)]
     ContractInfo {},
+
+    /// TokenInfo returns the information about a specific token.
+    #[returns(TokenInfo)]
+    TokenInfo { id: u64 },
+
+    /// Balance returns the amount in the balance for an owner and a specific
+    /// token.
+    #[returns(BalanceResponse)]
+    Balance { owner: String, id: u64 },
 }
 /// ContractInfoResponse holds basic contract information.
 #[cw_serde]
@@ -61,4 +85,10 @@ pub struct ContractInfoResponse {
 
     /// Collection description.
     pub description: String,
+}
+
+/// BalanceResponse holds the amount of a balance.
+#[cw_serde]
+pub struct BalanceResponse {
+    pub amount: Uint128,
 }

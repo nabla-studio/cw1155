@@ -1,8 +1,8 @@
-use cosmwasm_std::{Deps, StdResult};
+use cosmwasm_std::{Deps, StdResult, Uint128};
 
 use crate::{
-    msg::ContractInfoResponse,
-    state::{CONFIG, REGISTERED_TOKENS},
+    msg::{BalanceResponse, ContractInfoResponse},
+    state::{balances, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
 };
 
 pub fn query_config(deps: Deps) -> StdResult<ContractInfoResponse> {
@@ -16,5 +16,23 @@ pub fn query_config(deps: Deps) -> StdResult<ContractInfoResponse> {
         owner: config.owner.map(|owner| owner.to_string()),
         name: config.name,
         description: config.description,
+    })
+}
+
+pub fn query_token_info(deps: Deps, id: u64) -> StdResult<TokenInfo> {
+    TOKENS.load(deps.storage, id)
+}
+
+pub fn query_balance(deps: Deps, owner: String, id: u64) -> StdResult<BalanceResponse> {
+    let owner_addr = deps.api.addr_validate(&owner)?;
+    let balance = balances()
+        .may_load(deps.storage, (owner_addr.clone(), id))?
+        .unwrap_or(Balance {
+            owner: owner_addr,
+            id,
+            amount: Uint128::new(0),
+        });
+    Ok(BalanceResponse {
+        amount: balance.amount,
     })
 }
