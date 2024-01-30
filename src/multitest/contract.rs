@@ -1,8 +1,9 @@
-use cosmwasm_std::{Addr, StdResult, Uint128};
+use cosmwasm_std::{Addr, Binary, StdResult, Uint128};
 use cw_multi_test::{App, ContractWrapper, Executor};
 
 use crate::contract::{execute, instantiate, query};
-use crate::msg::{ContractInfoResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
+use crate::msg::{BalanceResponse, ContractInfoResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
+use crate::state::TokenInfo;
 use crate::ContractError;
 
 pub struct Cw1155(Addr);
@@ -77,9 +78,48 @@ impl Cw1155 {
     }
 
     #[track_caller]
+    pub fn mint_token(
+        &self,
+        app: &mut App,
+        sender: &Addr,
+        to: &str,
+        id: u64,
+        amount: Uint128,
+        msg: impl Into<Option<Binary>>,
+    ) -> Result<(), ContractError> {
+        let msg = msg.into();
+
+        app.execute_contract(
+            sender.clone(),
+            self.0.clone(),
+            &ExecuteMsg::Mint {
+                to: to.to_string(),
+                id,
+                amount,
+                msg,
+            },
+            &[],
+        )
+        .map_err(|err| err.downcast().unwrap())
+        .map(|_| ())
+    }
+
+    #[track_caller]
     pub fn query_contract_info(&self, app: &App) -> StdResult<ContractInfoResponse> {
         app.wrap()
             .query_wasm_smart(self.0.clone(), &QueryMsg::ContractInfo {})
+    }
+
+    #[track_caller]
+    pub fn query_token_info(&self, app: &App, id: u64) -> StdResult<TokenInfo> {
+        app.wrap()
+            .query_wasm_smart(self.0.clone(), &QueryMsg::TokenInfo { id })
+    }
+
+    #[track_caller]
+    pub fn query_balance(&self, app: &App, owner: String, id: u64) -> StdResult<BalanceResponse> {
+        app.wrap()
+            .query_wasm_smart(self.0.clone(), &QueryMsg::Balance { owner, id })
     }
 }
 

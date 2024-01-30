@@ -33,10 +33,8 @@ fn get_config() {
     )
     .unwrap();
 
-    // Query the contract configuration
     let info = contract.query_contract_info(&app).unwrap();
 
-    // Verify that contract configuration is as expected
     assert_eq!(
         info,
         ContractInfoResponse {
@@ -72,10 +70,8 @@ fn get_config_empty_owner_and_minter() {
     )
     .unwrap();
 
-    // Query the contract configuration
     let info = contract.query_contract_info(&app).unwrap();
 
-    // Verify that contract configuration is as expected
     assert_eq!(
         info,
         ContractInfoResponse {
@@ -111,13 +107,11 @@ fn get_no_registered_tokens() {
     )
     .unwrap();
 
-    // Query the contract configuration
     let token_count = contract
         .query_contract_info(&app)
         .unwrap()
         .registered_tokens;
 
-    // Verify that contract configuration is as expected
     assert_eq!(token_count, 0);
 }
 
@@ -147,13 +141,11 @@ fn register_max_supply_and_is_transferrable_token() {
         .register_token(&mut app, &sender, Uint128::from(1000u128), true)
         .unwrap();
 
-    // Query the contract configuration
     let token_count = contract
         .query_contract_info(&app)
         .unwrap()
         .registered_tokens;
 
-    // Verify that contract configuration is as expected
     assert_eq!(token_count, 1);
 }
 
@@ -183,13 +175,11 @@ fn register_max_supply_and_is_not_transferrable_token() {
         .register_token(&mut app, &sender, Uint128::from(1u128), false)
         .unwrap();
 
-    // Query the contract configuration
     let token_count = contract
         .query_contract_info(&app)
         .unwrap()
         .registered_tokens;
 
-    // Verify that contract configuration is as expected
     assert_eq!(token_count, 1);
 }
 
@@ -221,13 +211,11 @@ fn register_max_supply_zero_token() {
 
     assert_eq!(err, ContractError::ZeroMaxSupply {});
 
-    // Query the contract configuration
     let token_count = contract
         .query_contract_info(&app)
         .unwrap()
         .registered_tokens;
 
-    // Verify that contract configuration is as expected
     assert_eq!(token_count, 0);
 }
 
@@ -257,13 +245,11 @@ fn get_one_registered_token() {
         .register_token(&mut app, &sender, None, None)
         .unwrap();
 
-    // Query the contract configuration
     let token_count = contract
         .query_contract_info(&app)
         .unwrap()
         .registered_tokens;
 
-    // Verify that contract configuration is as expected
     assert_eq!(token_count, 1);
 }
 
@@ -296,12 +282,222 @@ fn unauthorized_register_token() {
 
     assert_eq!(err, ContractError::NotOwner {});
 
-    // Query the contract configuration
     let token_count = contract
         .query_contract_info(&app)
         .unwrap()
         .registered_tokens;
 
-    // Verify that contract configuration is as expected
     assert_eq!(token_count, 0);
+}
+
+#[test]
+fn mint_token() {
+    let sender = Addr::unchecked("sender");
+    let recipient = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register_token(&mut app, &sender, None, None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint_token(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    let user_balance = contract
+        .query_balance(&app, recipient.into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(user_balance, Uint128::from(10u128));
+}
+
+#[test]
+fn unauthorized_mint() {
+    let sender = Addr::unchecked("sender");
+    let recipient = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register_token(&mut app, &sender, None, None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    let err = contract
+        .mint_token(
+            &mut app,
+            &recipient,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::NotMinter);
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    let user_balance = contract
+        .query_balance(&app, recipient.into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(user_balance, Uint128::zero());
+}
+
+#[test]
+fn try_overcome_max_supply() {
+    let sender = Addr::unchecked("sender");
+    let recipient = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register_token(&mut app, &sender, Uint128::from(20u128), None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    let err = contract
+        .mint_token(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(100u128),
+            None,
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::CannotExceedMaxSupply);
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+}
+
+#[test]
+fn multiple_mint() {
+    let sender = Addr::unchecked("sender");
+    let recipient = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register_token(&mut app, &sender, Uint128::from(20u128), None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint_token(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    contract
+        .mint_token(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(20u128));
 }
