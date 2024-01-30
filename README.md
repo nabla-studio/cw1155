@@ -327,7 +327,7 @@ Handle the receipt of single token transfers or mints.
 Cw1155ReceiveMsg {
     "operator": "string",
     "from": "string",
-    "token_id": "integer",
+    "id": "integer",
     "amount": "integer",
     "msg": "binary"
 }
