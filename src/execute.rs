@@ -70,11 +70,11 @@ pub fn mint(
     amount: Uint128,
     msg: Option<Binary>,
 ) -> Result<Response, ContractError> {
-    // Validates the receiver's address.
-    let to_addr = deps.api.addr_validate(&to)?;
-
     // Ensures that the message sender is a minter.
     assert_minter(deps.storage, &info.sender)?;
+
+    // Validates the receiver's address.
+    let to_addr = deps.api.addr_validate(&to)?;
 
     // Increment the current supply of the token.
     increment_current_supply(deps.storage, id, &amount)?;

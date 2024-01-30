@@ -104,11 +104,16 @@ pub fn increment_current_supply(
     id: u64,
     amount: &Uint128,
 ) -> Result<TokenInfo, ContractError> {
+    // Validates that the amount is not zero.
+    if amount.is_zero() {
+        return Err(ContractError::InvalidZeroAmount);
+    }
+
     TOKENS.update(
         store,
         id,
         |token_info| -> Result<TokenInfo, ContractError> {
-            // Return an error if the token does not exist.
+            // Return an error if the token does not yet exist.
             let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken)?;
 
             // Increment the current supply of the token.

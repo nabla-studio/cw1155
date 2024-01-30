@@ -36,7 +36,7 @@ pub enum ContractError {
     #[error("Minting cannot exceed the maximum supply")]
     CannotExceedMaxSupply,
 
-    #[error("Invalid token ID")]
+    #[error("Invalid token ID. No token with that ID was already registered")]
     InvalidToken,
 
     #[error("User has insufficient balance for token with ID {id}: required {required}, available {available}")]
