@@ -1,7 +1,7 @@
 use cosmwasm_schema::cw_serde;
 
 use cosmwasm_std::{Addr, Uint128};
-use cw_storage_plus::{Item, Map};
+use cw_storage_plus::{Index, IndexList, IndexedMap, Item, Map, MultiIndex};
 
 #[cw_serde]
 pub struct Config {
@@ -43,3 +43,41 @@ pub struct TokenInfo {
 /// TODO: Understand why no Vec is available in cw-storage-plus and if
 /// using a Map is the right way to go.
 pub const TOKENS: Map<u64, TokenInfo> = Map::new("tokens");
+
+#[cw_serde]
+pub struct Balance {
+    /// Owner of the token.
+    pub owner: Addr,
+    /// Identifier of the token.
+    pub id: u64,
+    /// Amount of the token for the owner.
+    pub amount: Uint128,
+}
+
+pub struct BalancesIndexes<'a> {
+    pub owner_index: MultiIndex<'a, Addr, Balance, (Addr, u64)>,
+    pub token_index: MultiIndex<'a, u64, Balance, (Addr, u64)>,
+}
+
+impl<'a> IndexList<Balance> for BalancesIndexes<'a> {
+    fn get_indexes(&'_ self) -> Box<dyn Iterator<Item = &'_ dyn Index<Balance>> + '_> {
+        let v: Vec<&dyn Index<Balance>> = vec![&self.owner_index, &self.token_index];
+        Box::new(v.into_iter())
+    }
+}
+
+pub fn balances<'a>() -> IndexedMap<'a, (Addr, u64), Balance, BalancesIndexes<'a>> {
+    let indexes = BalancesIndexes {
+        owner_index: MultiIndex::new(
+            |_, balance: &Balance| balance.owner.clone(),
+            "balances",
+            "balances__owner",
+        ),
+        token_index: MultiIndex::new(
+            |_, balance: &Balance| balance.id,
+            "balances",
+            "balances__id",
+        ),
+    };
+    IndexedMap::new("balances", indexes)
+}
