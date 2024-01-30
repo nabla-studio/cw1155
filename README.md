@@ -186,6 +186,18 @@ Parameter:
 
 *NOTE: Only the current minter can change the minter address.*
 
+#### DisableMinting
+
+Disable the minting operations.
+
+```
+DisableMinting {
+}
+```
+
+*NOTE: Only the current minter can disable the minting. Once disabled,
+minting cannot be enabled anymore.*
+
 #### SetOwner
 
 Modify the address of who can perform registering operations.
