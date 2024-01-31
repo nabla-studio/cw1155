@@ -1,7 +1,11 @@
 use cosmwasm_std::{Addr, Uint128};
 use cw_multi_test::App;
+use cw_utils::Expiration;
 
-use crate::{msg::ContractInfoResponse, ContractError};
+use crate::{
+    msg::{ContractInfoResponse, IsApprovedForAllResponse},
+    ContractError,
+};
 
 use super::contract::Cw1155;
 
@@ -587,4 +591,269 @@ fn mint_multiple_recipients() {
         .amount;
 
     assert_eq!(recipient2_balance, Uint128::from(12u128));
+}
+
+#[test]
+fn alice_approve_bob() {
+    let sender = Addr::unchecked("sender");
+    let alice = Addr::unchecked("alice");
+    let bob = Addr::unchecked("bob");
+
+    let mut app = App::default();
+
+    let start_time = 12_345;
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .approve_all(
+            &mut app,
+            &alice,
+            bob.as_str(),
+            Some(Expiration::AtHeight(start_time + 1)),
+        )
+        .unwrap();
+
+    let bob_alice_approvals = contract
+        .query_is_approved_for_all(&app, alice.into_string(), bob.clone().into_string())
+        .unwrap();
+
+    assert_eq!(
+        bob_alice_approvals,
+        IsApprovedForAllResponse {
+            expiration: Some(Expiration::AtHeight(start_time + 1))
+        }
+    );
+
+    let sender_alice_approvals = contract
+        .query_is_approved_for_all(&app, sender.into_string(), bob.into_string())
+        .unwrap();
+
+    assert_eq!(
+        sender_alice_approvals,
+        IsApprovedForAllResponse { expiration: None }
+    );
+}
+
+#[test]
+fn expired_approve() {
+    let sender = Addr::unchecked("sender");
+    let alice = Addr::unchecked("alice");
+    let bob = Addr::unchecked("bob");
+
+    let mut app = App::default();
+
+    let start_time = 12_345;
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    let err = contract
+        .approve_all(
+            &mut app,
+            &alice,
+            bob.as_str(),
+            Some(Expiration::AtHeight(start_time - 1)),
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::Expired);
+
+    let bob_alice_approvals = contract
+        .query_is_approved_for_all(&app, alice.into_string(), bob.clone().into_string())
+        .unwrap();
+
+    assert_eq!(
+        bob_alice_approvals,
+        IsApprovedForAllResponse { expiration: None }
+    );
+}
+
+#[test]
+fn alice_multiple_approve() {
+    let sender = Addr::unchecked("sender");
+    let alice = Addr::unchecked("alice");
+    let bob = Addr::unchecked("bob");
+
+    let mut app = App::default();
+
+    let start_time = 12_345;
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .approve_all(
+            &mut app,
+            &alice,
+            bob.as_str(),
+            Some(Expiration::AtHeight(start_time + 1)),
+        )
+        .unwrap();
+
+    contract
+        .approve_all(
+            &mut app,
+            &alice,
+            sender.as_str(),
+            Some(Expiration::Never {}),
+        )
+        .unwrap();
+
+    let bob_alice_approvals = contract
+        .query_is_approved_for_all(&app, alice.clone().into_string(), bob.clone().into_string())
+        .unwrap();
+
+    assert_eq!(
+        bob_alice_approvals,
+        IsApprovedForAllResponse {
+            expiration: Some(Expiration::AtHeight(start_time + 1))
+        }
+    );
+
+    let sender_alice_approvals = contract
+        .query_is_approved_for_all(&app, alice.into_string(), sender.into_string())
+        .unwrap();
+
+    assert_eq!(
+        sender_alice_approvals,
+        IsApprovedForAllResponse {
+            expiration: Some(Expiration::Never {})
+        }
+    );
+}
+
+#[test]
+fn alice_revoke() {
+    let sender = Addr::unchecked("sender");
+    let alice = Addr::unchecked("alice");
+    let bob = Addr::unchecked("bob");
+
+    let mut app = App::default();
+
+    let start_time = 12_345;
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .approve_all(
+            &mut app,
+            &alice,
+            bob.as_str(),
+            Some(Expiration::AtHeight(start_time + 1)),
+        )
+        .unwrap();
+
+    contract
+        .approve_all(
+            &mut app,
+            &alice,
+            sender.as_str(),
+            Some(Expiration::Never {}),
+        )
+        .unwrap();
+
+    let bob_alice_approvals = contract
+        .query_is_approved_for_all(&app, alice.clone().into_string(), bob.clone().into_string())
+        .unwrap();
+
+    assert_eq!(
+        bob_alice_approvals,
+        IsApprovedForAllResponse {
+            expiration: Some(Expiration::AtHeight(start_time + 1))
+        }
+    );
+
+    let sender_alice_approvals = contract
+        .query_is_approved_for_all(
+            &app,
+            alice.clone().into_string(),
+            sender.clone().into_string(),
+        )
+        .unwrap();
+
+    assert_eq!(
+        sender_alice_approvals,
+        IsApprovedForAllResponse {
+            expiration: Some(Expiration::Never {})
+        }
+    );
+
+    contract
+        .revoke_all(&mut app, &alice, sender.as_str())
+        .unwrap();
+
+    let bob_alice_approvals = contract
+        .query_is_approved_for_all(&app, alice.clone().into_string(), bob.clone().into_string())
+        .unwrap();
+
+    assert_eq!(
+        bob_alice_approvals,
+        IsApprovedForAllResponse {
+            expiration: Some(Expiration::AtHeight(start_time + 1))
+        }
+    );
+
+    let sender_alice_approvals = contract
+        .query_is_approved_for_all(&app, alice.into_string(), sender.into_string())
+        .unwrap();
+
+    assert_eq!(
+        sender_alice_approvals,
+        IsApprovedForAllResponse { expiration: None }
+    );
 }

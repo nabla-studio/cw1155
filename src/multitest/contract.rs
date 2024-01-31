@@ -1,8 +1,12 @@
 use cosmwasm_std::{Addr, Binary, StdResult, Uint128};
 use cw_multi_test::{App, ContractWrapper, Executor};
+use cw_utils::Expiration;
 
 use crate::contract::{execute, instantiate, query};
-use crate::msg::{BalanceResponse, ContractInfoResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
+use crate::msg::{
+    BalanceResponse, ContractInfoResponse, ExecuteMsg, InstantiateMsg, IsApprovedForAllResponse,
+    QueryMsg,
+};
 use crate::state::TokenInfo;
 use crate::ContractError;
 
@@ -105,6 +109,48 @@ impl Cw1155 {
     }
 
     #[track_caller]
+    pub fn approve_all(
+        &self,
+        app: &mut App,
+        sender: &Addr,
+        operator: &str,
+        expiration: impl Into<Option<Expiration>>,
+    ) -> Result<(), ContractError> {
+        let expiration = expiration.into();
+
+        app.execute_contract(
+            sender.clone(),
+            self.0.clone(),
+            &ExecuteMsg::ApproveAll {
+                operator: operator.to_string(),
+                expiration,
+            },
+            &[],
+        )
+        .map_err(|err| err.downcast().unwrap())
+        .map(|_| ())
+    }
+
+    #[track_caller]
+    pub fn revoke_all(
+        &self,
+        app: &mut App,
+        sender: &Addr,
+        operator: &str,
+    ) -> Result<(), ContractError> {
+        app.execute_contract(
+            sender.clone(),
+            self.0.clone(),
+            &ExecuteMsg::RevokeAll {
+                operator: operator.to_string(),
+            },
+            &[],
+        )
+        .map_err(|err| err.downcast().unwrap())
+        .map(|_| ())
+    }
+
+    #[track_caller]
     pub fn query_contract_info(&self, app: &App) -> StdResult<ContractInfoResponse> {
         app.wrap()
             .query_wasm_smart(self.0.clone(), &QueryMsg::ContractInfo {})
@@ -120,6 +166,19 @@ impl Cw1155 {
     pub fn query_balance(&self, app: &App, owner: String, id: u64) -> StdResult<BalanceResponse> {
         app.wrap()
             .query_wasm_smart(self.0.clone(), &QueryMsg::Balance { owner, id })
+    }
+
+    #[track_caller]
+    pub fn query_is_approved_for_all(
+        &self,
+        app: &App,
+        owner: String,
+        operator: String,
+    ) -> StdResult<IsApprovedForAllResponse> {
+        app.wrap().query_wasm_smart(
+            self.0.clone(),
+            &QueryMsg::IsApprovedForAll { owner, operator },
+        )
     }
 }
 
