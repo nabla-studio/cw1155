@@ -1,7 +1,7 @@
-use cosmwasm_std::{Addr, Storage, Uint128};
+use cosmwasm_std::{Addr, Env, Storage, Uint128};
 
 use crate::{
-    state::{balances, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
+    state::{approvals, balances, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
     ContractError,
 };
 
@@ -39,13 +39,23 @@ pub fn assert_minter(store: &dyn Storage, sender: &Addr) -> Result<(), ContractE
     Ok(())
 }
 
-pub fn increase_registered_tokens(store: &mut dyn Storage) -> Result<u64, ContractError> {
-    REGISTERED_TOKENS.update(store, |tokens_number| -> Result<u64, ContractError> {
-        match tokens_number.checked_add(1) {
-            Some(new_value) => Ok(new_value),
-            None => Err(ContractError::MaximumNumberOfTokens),
-        }
-    })
+/// Assert that the operator can manage the tokens.
+pub fn assert_can_manage(
+    store: &dyn Storage,
+    env: &Env,
+    owner: Addr,
+    operator: Addr,
+) -> Result<(), ContractError> {
+    // Owner can manage for itself
+    if owner == operator {
+        return Ok(());
+    }
+
+    // Operator can manage only for owners that have already granted him.
+    match approvals().may_load(store, (owner, operator))? {
+        Some(approval) if !approval.expiration.is_expired(&env.block) => Ok(()),
+        _ => Err(ContractError::Unauthorized),
+    }
 }
 
 /// Possible actions that can be performed on a balance.
@@ -97,9 +107,19 @@ pub fn update_balance(
     )
 }
 
-/// Increment the current supply of a token remaining in the safe range of
+/// Increase the number of registered tokens.
+pub fn increase_registered_tokens(store: &mut dyn Storage) -> Result<u64, ContractError> {
+    REGISTERED_TOKENS.update(store, |tokens_number| -> Result<u64, ContractError> {
+        match tokens_number.checked_add(1) {
+            Some(new_value) => Ok(new_value),
+            None => Err(ContractError::MaximumNumberOfTokens),
+        }
+    })
+}
+
+/// Increase the current supply of a token remaining in the safe range of
 /// Uin128 and below the maximum supply (if provided).
-pub fn increment_current_supply(
+pub fn increase_current_supply(
     store: &mut dyn Storage,
     id: u64,
     amount: &Uint128,
@@ -116,7 +136,7 @@ pub fn increment_current_supply(
             // Return an error if the token does not yet exist.
             let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken)?;
 
-            // Increment the current supply of the token.
+            // Increase the current supply of the token.
             token_info.current_supply = token_info.current_supply.checked_add(*amount)?;
 
             // Calculate the total supply (current_supply + burned).
@@ -128,6 +148,38 @@ pub fn increment_current_supply(
                     return Err(ContractError::CannotExceedMaxSupply);
                 }
             }
+
+            // Save the updated token information.
+            Ok(token_info)
+        },
+    )
+}
+
+/// Decrease the current supply of a token. It can only happen by burning
+/// actions, so the burned supply needs to increase. All of this in the
+/// safe range of Uin128.
+pub fn decrease_current_supply(
+    store: &mut dyn Storage,
+    id: u64,
+    amount: &Uint128,
+) -> Result<TokenInfo, ContractError> {
+    // Validates that the amount is not zero.
+    if amount.is_zero() {
+        return Err(ContractError::InvalidZeroAmount);
+    }
+
+    TOKENS.update(
+        store,
+        id,
+        |token_info| -> Result<TokenInfo, ContractError> {
+            // Return an error if the token does not yet exist.
+            let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken)?;
+
+            // Decrease the current supply of the token.
+            token_info.current_supply = token_info.current_supply.checked_sub(*amount)?;
+
+            // Increase the burned supply of the token.
+            token_info.burned = token_info.burned.checked_add(*amount)?;
 
             // Save the updated token information.
             Ok(token_info)

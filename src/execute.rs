@@ -4,8 +4,8 @@ use cw_utils::Expiration;
 
 use crate::{
     helpers::{
-        assert_minter, assert_owner, increase_registered_tokens, increment_current_supply,
-        update_balance, BalanceAction,
+        assert_can_manage, assert_minter, assert_owner, decrease_current_supply,
+        increase_current_supply, increase_registered_tokens, update_balance, BalanceAction,
     },
     receiver::Cw1155ReceiveMsg,
     state::{approvals, Approval, TokenInfo, TOKENS},
@@ -77,8 +77,8 @@ pub fn mint(
     // Validates the receiver's address.
     let to_addr = deps.api.addr_validate(&to)?;
 
-    // Increment the current supply of the token.
-    increment_current_supply(deps.storage, id, &amount)?;
+    // Increase the current supply of the token.
+    increase_current_supply(deps.storage, id, &amount)?;
 
     // Executes the transfer of the minted tokens to the specified address.
     exec_transfer(deps, None, Some(to_addr), id, amount)?;
@@ -103,6 +103,37 @@ pub fn mint(
             .into_cosmos_msg(to)?,
         );
     }
+
+    Ok(resp)
+}
+
+//  Burns a specified quantity of a token from a holder's address.
+pub fn burn(
+    deps: DepsMut,
+    info: MessageInfo,
+    env: Env,
+    from: String,
+    id: u64,
+    amount: Uint128,
+) -> Result<Response, ContractError> {
+    // Validates the receiver's address.
+    let from_addr = deps.api.addr_validate(&from)?;
+
+    // Ensures that the message sender can manage the tokens.
+    assert_can_manage(deps.storage, &env, from_addr.clone(), info.sender)?;
+
+    // Decrease the current supply of the token.
+    decrease_current_supply(deps.storage, id, &amount)?;
+
+    // Executes the transfer of the minted tokens to the specified address.
+    exec_transfer(deps, Some(from_addr), None, id, amount)?;
+
+    // Initialize a response with basic minting attributes.
+    let resp = Response::default()
+        .add_attribute("action", "burn")
+        .add_attribute("from", &from)
+        .add_attribute("id", id.to_string())
+        .add_attribute("amount", amount);
 
     Ok(resp)
 }

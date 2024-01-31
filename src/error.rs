@@ -42,6 +42,9 @@ pub enum ContractError {
     #[error("The provided expiration has already expired")]
     Expired,
 
+    #[error("The operator is not authorised to operate on all of the owner's tokens")]
+    Unauthorized,
+
     #[error("User has insufficient balance for token with ID {id}: required {required}, available {available}")]
     InsufficientFunds {
         id: u64,
