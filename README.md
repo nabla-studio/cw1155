@@ -186,12 +186,13 @@ Parameter:
 
 *NOTE: Only the current minter can change the minter address.*
 
-#### DisableMinting
+#### DisableTokenMinting
 
-Disable the minting operations.
+Disable the minting operations for a specific token id.
 
 ```
-DisableMinting {
+DisableTokenMinting {
+    "id*": "integer"
 }
 ```
 
