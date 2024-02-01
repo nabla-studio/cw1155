@@ -202,6 +202,23 @@ impl Cw1155 {
     }
 
     #[track_caller]
+    pub fn set_minter(
+        &self,
+        app: &mut App,
+        sender: &Addr,
+        minter: Option<String>,
+    ) -> Result<(), ContractError> {
+        app.execute_contract(
+            sender.clone(),
+            self.0.clone(),
+            &ExecuteMsg::SetMinter { minter: minter },
+            &[],
+        )
+        .map_err(|err| err.downcast().unwrap())
+        .map(|_| ())
+    }
+
+    #[track_caller]
     pub fn query_contract_info(&self, app: &App) -> StdResult<ConfigResponse> {
         app.wrap()
             .query_wasm_smart(self.0.clone(), &QueryMsg::Config {})

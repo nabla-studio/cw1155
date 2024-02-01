@@ -1657,3 +1657,167 @@ fn auto_transfer() {
 
     assert_eq!(recipient1_balance, Uint128::from(10u128));
 }
+
+#[test]
+fn set_minter_mint() {
+    let sender = Addr::unchecked("sender");
+    let minter = Addr::unchecked("minter");
+    let recipient = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    let user_balance = contract
+        .query_balance(&app, recipient.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(user_balance, Uint128::from(10u128));
+
+    contract
+        .set_minter(&mut app, &sender, Some(minter.to_string()))
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &minter,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(20u128));
+
+    let user_balance = contract
+        .query_balance(&app, recipient.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(user_balance, Uint128::from(20u128));
+
+    let err = contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::NotMinter);
+}
+
+#[test]
+fn unauthorized_set_minter() {
+    let sender = Addr::unchecked("sender");
+    let minter = Addr::unchecked("minter");
+    let recipient = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .set_minter(&mut app, &sender, Some(minter.to_string()))
+        .unwrap();
+
+    let err = contract
+        .set_minter(&mut app, &sender, Some(recipient.to_string()))
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::NotMinter);
+}
+
+#[test]
+fn set_minter_none() {
+    let sender = Addr::unchecked("sender");
+    let minter = Addr::unchecked("minter");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        Some(&minter),
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    let err = contract.set_minter(&mut app, &sender, None).unwrap_err();
+
+    assert_eq!(err, ContractError::NotMinter);
+
+    contract.set_minter(&mut app, &minter, None).unwrap();
+}
