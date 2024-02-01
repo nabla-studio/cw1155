@@ -1224,3 +1224,436 @@ fn too_much_to_burn() {
 
     assert_eq!(user_balance, Uint128::from(10u128));
 }
+
+#[test]
+fn transfer_from() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient2 = Addr::unchecked("recipient2");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register(&mut app, &sender, Uint128::from(20u128), None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    contract
+        .transfer_from(
+            &mut app,
+            &recipient1,
+            recipient1.as_str(),
+            recipient2.as_str(),
+            1,
+            Uint128::from(5u128),
+            None,
+        )
+        .unwrap();
+
+    let TokenInfo {
+        current_supply,
+        burned,
+        ..
+    } = contract.query_token_info(&app, 1).unwrap();
+    assert_eq!(current_supply, Uint128::from(10u128));
+    assert_eq!(burned, Uint128::zero());
+
+    let recipient1_balance = contract
+        .query_balance(&app, recipient1.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(recipient1_balance, Uint128::from(5u128));
+
+    let recipient2_balance = contract
+        .query_balance(&app, recipient2.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(recipient2_balance, Uint128::from(5u128));
+}
+
+#[test]
+fn unauthorized_transfer_from() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient2 = Addr::unchecked("recipient2");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register(&mut app, &sender, Uint128::from(20u128), None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    let err = contract
+        .transfer_from(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            recipient2.as_str(),
+            1,
+            Uint128::from(5u128),
+            None,
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::Unauthorized {});
+
+    let recipient1_balance = contract
+        .query_balance(&app, recipient1.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(recipient1_balance, Uint128::from(10u128));
+}
+
+#[test]
+fn authorized_transfer_from() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient2 = Addr::unchecked("recipient2");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register(&mut app, &sender, Uint128::from(20u128), None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    contract
+        .approve_all(
+            &mut app,
+            &recipient1,
+            sender.as_str(),
+            Some(Expiration::Never {}),
+        )
+        .unwrap();
+
+    contract
+        .transfer_from(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            recipient2.as_str(),
+            1,
+            Uint128::from(5u128),
+            None,
+        )
+        .unwrap();
+
+    let recipient1_balance = contract
+        .query_balance(&app, recipient1.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(recipient1_balance, Uint128::from(5u128));
+
+    let recipient2_balance = contract
+        .query_balance(&app, recipient2.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(recipient2_balance, Uint128::from(5u128));
+}
+
+#[test]
+fn too_much_to_transfer_from() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient2 = Addr::unchecked("recipient2");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register(&mut app, &sender, Uint128::from(20u128), None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    let err = contract
+        .transfer_from(
+            &mut app,
+            &recipient1,
+            recipient1.as_str(),
+            recipient2.as_str(),
+            1,
+            Uint128::from(15u128),
+            None,
+        )
+        .unwrap_err();
+
+    assert_eq!(
+        err,
+        ContractError::InsufficientFunds {
+            id: 1,
+            required: Uint128::from(15u128),
+            available: Uint128::from(10u128)
+        }
+    );
+}
+
+#[test]
+fn transfer_zero() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient2 = Addr::unchecked("recipient2");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register(&mut app, &sender, Uint128::from(20u128), None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    let err = contract
+        .transfer_from(
+            &mut app,
+            &recipient1,
+            recipient1.as_str(),
+            recipient2.as_str(),
+            1,
+            Uint128::zero(),
+            None,
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::InvalidZeroAmount);
+
+    let recipient1_balance = contract
+        .query_balance(&app, recipient1.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(recipient1_balance, Uint128::from(10u128));
+
+    let recipient2_balance = contract
+        .query_balance(&app, recipient2.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(recipient2_balance, Uint128::zero());
+}
+
+#[test]
+fn auto_transfer() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .register(&mut app, &sender, Uint128::from(20u128), None)
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    contract
+        .transfer_from(
+            &mut app,
+            &recipient1,
+            recipient1.as_str(),
+            recipient1.as_str(),
+            1,
+            Uint128::from(5u128),
+            None,
+        )
+        .unwrap();
+
+    let recipient1_balance = contract
+        .query_balance(&app, recipient1.clone().into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(recipient1_balance, Uint128::from(10u128));
+}

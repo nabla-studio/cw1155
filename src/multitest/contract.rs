@@ -131,6 +131,35 @@ impl Cw1155 {
     }
 
     #[track_caller]
+    pub fn transfer_from(
+        &self,
+        app: &mut App,
+        sender: &Addr,
+        from: &str,
+        to: &str,
+        id: u64,
+        amount: Uint128,
+        msg: impl Into<Option<Binary>>,
+    ) -> Result<(), ContractError> {
+        let msg = msg.into();
+
+        app.execute_contract(
+            sender.clone(),
+            self.0.clone(),
+            &ExecuteMsg::TransferFrom {
+                from: from.to_string(),
+                to: to.to_string(),
+                id,
+                amount,
+                msg,
+            },
+            &[],
+        )
+        .map_err(|err| err.downcast().unwrap())
+        .map(|_| ())
+    }
+
+    #[track_caller]
     pub fn approve_all(
         &self,
         app: &mut App,
