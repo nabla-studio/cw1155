@@ -1,4 +1,4 @@
-use cosmwasm_std::{Addr, Env, StdResult, Storage, Uint128};
+use cosmwasm_std::{Addr, Env, Storage, Uint128};
 
 use crate::{
     msg::BalanceResponse,
@@ -216,7 +216,16 @@ pub fn update_max_supply(store: &mut dyn Storage, id: u64) -> Result<TokenInfo, 
 }
 
 /// helper function to get the balance of an account for a token.
-pub fn fetch_balance(store: &dyn Storage, owner_addr: Addr, id: u64) -> StdResult<BalanceResponse> {
+pub fn fetch_balance(
+    store: &dyn Storage,
+    owner_addr: Addr,
+    id: u64,
+) -> Result<BalanceResponse, ContractError> {
+    // Return invalid token if the token is not registered.
+    if TOKENS.may_load(store, id)?.is_none() {
+        return Err(ContractError::InvalidToken);
+    }
+
     // Load the balance of the account for the token.
     let balance = balances()
         .may_load(store, (owner_addr.clone(), id))?

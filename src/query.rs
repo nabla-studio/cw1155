@@ -4,6 +4,7 @@ use crate::{
     helpers::fetch_balance,
     msg::{BalanceResponse, BatchBalanceResponse, ConfigResponse, IsApprovedForAllResponse},
     state::{approvals, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
+    ContractError,
 };
 
 // Query contract configuration.
@@ -25,13 +26,16 @@ pub fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
 }
 
 // Query information about a specific token.
-pub fn query_token_info(deps: Deps, id: u64) -> StdResult<TokenInfo> {
+pub fn query_token_info(deps: Deps, id: u64) -> Result<TokenInfo, ContractError> {
     // Load token information by token ID from the storage.
-    TOKENS.load(deps.storage, id)
+    match TOKENS.may_load(deps.storage, id)? {
+        Some(token_info) => Ok(token_info),
+        None => return Err(ContractError::InvalidToken),
+    }
 }
 
 // Query the balance of a specific token for a given owner.
-pub fn query_balance(deps: Deps, owner: String, id: u64) -> StdResult<BalanceResponse> {
+pub fn query_balance(deps: Deps, owner: String, id: u64) -> Result<BalanceResponse, ContractError> {
     // Validate the owner address.
     let owner_addr = deps.api.addr_validate(&owner)?;
 
@@ -44,15 +48,17 @@ pub fn query_batch_balance(
     deps: Deps,
     owner: String,
     ids: Vec<u64>,
-) -> StdResult<BatchBalanceResponse> {
+) -> Result<BatchBalanceResponse, ContractError> {
     // Validate the owner address.
     let owner_addr = deps.api.addr_validate(&owner)?;
 
     // Fetch balances for all IDs, collecting any errors.
     let balances = ids
         .into_iter()
-        .map(|id| -> StdResult<_> { fetch_balance(deps.storage, owner_addr.clone(), id) })
-        .collect::<StdResult<_>>()?;
+        .map(|id| -> Result<_, ContractError> {
+            fetch_balance(deps.storage, owner_addr.clone(), id)
+        })
+        .collect::<Result<_, ContractError>>()?;
 
     // Return the batch balance response.
     Ok(BatchBalanceResponse { balances })

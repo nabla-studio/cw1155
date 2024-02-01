@@ -1,6 +1,6 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+use cosmwasm_std::{to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response};
 use cw2::set_contract_version;
 
 use crate::error::ContractError;
@@ -92,16 +92,18 @@ pub fn execute(
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
+pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractError> {
     match msg {
-        QueryMsg::Balance { owner, id } => to_json_binary(&query::query_balance(deps, owner, id)?),
-        QueryMsg::BatchBalance { owner, ids } => {
-            to_json_binary(&query::query_batch_balance(deps, owner, ids)?)
+        QueryMsg::Balance { owner, id } => {
+            Ok(to_json_binary(&query::query_balance(deps, owner, id)?)?)
         }
-        QueryMsg::IsApprovedForAll { owner, operator } => {
-            to_json_binary(&query::query_approved_for_all(deps, owner, operator)?)
-        }
-        QueryMsg::Config {} => to_json_binary(&query::query_config(deps)?),
-        QueryMsg::TokenInfo { id } => to_json_binary(&query::query_token_info(deps, id)?),
+        QueryMsg::BatchBalance { owner, ids } => Ok(to_json_binary(&query::query_batch_balance(
+            deps, owner, ids,
+        )?)?),
+        QueryMsg::IsApprovedForAll { owner, operator } => Ok(to_json_binary(
+            &query::query_approved_for_all(deps, owner, operator)?,
+        )?),
+        QueryMsg::Config {} => Ok(to_json_binary(&query::query_config(deps)?)?),
+        QueryMsg::TokenInfo { id } => Ok(to_json_binary(&query::query_token_info(deps, id)?)?),
     }
 }
