@@ -77,6 +77,7 @@ pub fn execute(
         ExecuteMsg::Burn { from, id, amount } => execute::burn(deps, info, env, from, id, amount),
         ExecuteMsg::SetMinter { minter } => execute::set_minter(deps, info, minter),
         ExecuteMsg::DisableTokenMinting { id } => execute::disable_token_minting(deps, info, id),
+        ExecuteMsg::SetOwner { owner } => execute::set_owner(deps, info, owner),
     }
 }
 

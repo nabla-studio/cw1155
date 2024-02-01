@@ -84,6 +84,11 @@ pub enum ExecuteMsg {
         /// ID of the token for which disable the minting operations.
         id: u64,
     },
+
+    /// Modify the address of who can perform registering operations.
+    /// None value indicates that the registering operation are disabled.
+    /// NOTE: Once disabled, the owner address cannot be changed.
+    SetOwner { owner: Option<String> },
 }
 
 #[cw_serde]

@@ -279,3 +279,32 @@ pub fn disable_token_minting(
 
     Ok(resp)
 }
+
+/// Modify the address of who can perform registering operations.
+pub fn set_owner(
+    deps: DepsMut,
+    info: MessageInfo,
+    owner: Option<String>,
+) -> Result<Response, ContractError> {
+    // Retrieve the configuration information.
+    let mut config = CONFIG.load(deps.storage)?;
+
+    // Ensures that the message sender is the owner.
+    assert_owner(deps.storage, &info.sender)?;
+
+    // Check the new owner's address and use it if valid.
+    config.owner = match owner.clone() {
+        Some(owner) => Some(deps.api.addr_validate(&owner)?),
+        None => None,
+    };
+
+    // Saves the newly updated token configuration.
+    CONFIG.save(deps.storage, &config)?;
+
+    // Prepare the response.
+    let resp = Response::default()
+        .add_attribute("action", "update_owner")
+        .add_attribute("new_owner", owner.unwrap_or_else(|| "None".to_string()));
+
+    Ok(resp)
+}
