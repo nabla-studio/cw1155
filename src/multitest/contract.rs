@@ -109,6 +109,29 @@ impl Cw1155 {
     }
 
     #[track_caller]
+    pub fn burn(
+        &self,
+        app: &mut App,
+        sender: &Addr,
+        from: &str,
+        id: u64,
+        amount: Uint128,
+    ) -> Result<(), ContractError> {
+        app.execute_contract(
+            sender.clone(),
+            self.0.clone(),
+            &ExecuteMsg::Burn {
+                from: from.to_string(),
+                id,
+                amount,
+            },
+            &[],
+        )
+        .map_err(|err| err.downcast().unwrap())
+        .map(|_| ())
+    }
+
+    #[track_caller]
     pub fn approve_all(
         &self,
         app: &mut App,
