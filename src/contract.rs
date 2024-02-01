@@ -94,7 +94,7 @@ pub fn execute(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::ContractInfo {} => to_json_binary(&query::query_config(deps)?),
+        QueryMsg::Config {} => to_json_binary(&query::query_config(deps)?),
         QueryMsg::TokenInfo { id } => to_json_binary(&query::query_token_info(deps, id)?),
         QueryMsg::Balance { owner, id } => to_json_binary(&query::query_balance(deps, owner, id)?),
         QueryMsg::IsApprovedForAll { owner, operator } => {

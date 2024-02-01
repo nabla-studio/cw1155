@@ -111,15 +111,6 @@ pub enum ExecuteMsg {
 #[cw_serde]
 #[derive(QueryResponses)]
 pub enum QueryMsg {
-    /// ContractInfo returns the current information about the contract and the
-    /// related tokens collection.
-    #[returns(ContractInfoResponse)]
-    ContractInfo {},
-
-    /// TokenInfo returns the information about a specific token.
-    #[returns(TokenInfo)]
-    TokenInfo { id: u64 },
-
     /// Balance returns the amount in the balance for an owner and a specific
     /// token.
     #[returns(BalanceResponse)]
@@ -129,10 +120,19 @@ pub enum QueryMsg {
     /// the tokens owned by an owner.
     #[returns(BalanceResponse)]
     IsApprovedForAll { owner: String, operator: String },
+
+    /// Config returns the current information about the contract and the
+    /// related tokens collection.
+    #[returns(ConfigResponse)]
+    Config {},
+
+    /// TokenInfo returns the information about a specific token.
+    #[returns(TokenInfo)]
+    TokenInfo { id: u64 },
 }
-/// ContractInfoResponse holds basic contract information.
+/// ConfigResponse holds basic contract information.
 #[cw_serde]
-pub struct ContractInfoResponse {
+pub struct ConfigResponse {
     /// Number of registered tokens.
     pub registered_tokens: u64,
 

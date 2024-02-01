@@ -3,7 +3,7 @@ use cw_multi_test::App;
 use cw_utils::Expiration;
 
 use crate::{
-    msg::{ContractInfoResponse, IsApprovedForAllResponse},
+    msg::{ConfigResponse, IsApprovedForAllResponse},
     state::TokenInfo,
     ContractError,
 };
@@ -42,7 +42,7 @@ fn get_config() {
 
     assert_eq!(
         info,
-        ContractInfoResponse {
+        ConfigResponse {
             registered_tokens: 0,
             metadata_uri: METADATA_URI.to_string(),
             minter: Some(minter.to_string()),
@@ -79,7 +79,7 @@ fn get_config_empty_owner_and_minter() {
 
     assert_eq!(
         info,
-        ContractInfoResponse {
+        ConfigResponse {
             registered_tokens: 0,
             metadata_uri: METADATA_URI.to_string(),
             minter: Some(sender.to_string()),

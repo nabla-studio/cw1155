@@ -1,15 +1,15 @@
 use cosmwasm_std::{Deps, StdResult, Uint128};
 
 use crate::{
-    msg::{BalanceResponse, ContractInfoResponse, IsApprovedForAllResponse},
+    msg::{BalanceResponse, ConfigResponse, IsApprovedForAllResponse},
     state::{approvals, balances, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
 };
 
-pub fn query_config(deps: Deps) -> StdResult<ContractInfoResponse> {
+pub fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
     let config = CONFIG.load(deps.storage)?;
     let registered_tokens = REGISTERED_TOKENS.load(deps.storage)?;
 
-    Ok(ContractInfoResponse {
+    Ok(ConfigResponse {
         registered_tokens,
         metadata_uri: config.metadata_uri,
         minter: config.minter.map(|minter| minter.to_string()),

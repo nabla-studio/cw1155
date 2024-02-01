@@ -4,8 +4,7 @@ use cw_utils::Expiration;
 
 use crate::contract::{execute, instantiate, query};
 use crate::msg::{
-    BalanceResponse, ContractInfoResponse, ExecuteMsg, InstantiateMsg, IsApprovedForAllResponse,
-    QueryMsg,
+    BalanceResponse, ConfigResponse, ExecuteMsg, InstantiateMsg, IsApprovedForAllResponse, QueryMsg,
 };
 use crate::state::TokenInfo;
 use crate::ContractError;
@@ -174,9 +173,9 @@ impl Cw1155 {
     }
 
     #[track_caller]
-    pub fn query_contract_info(&self, app: &App) -> StdResult<ContractInfoResponse> {
+    pub fn query_contract_info(&self, app: &App) -> StdResult<ConfigResponse> {
         app.wrap()
-            .query_wasm_smart(self.0.clone(), &QueryMsg::ContractInfo {})
+            .query_wasm_smart(self.0.clone(), &QueryMsg::Config {})
     }
 
     #[track_caller]
