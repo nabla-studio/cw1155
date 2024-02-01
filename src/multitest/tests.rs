@@ -1821,3 +1821,97 @@ fn set_minter_none() {
 
     contract.set_minter(&mut app, &minter, None).unwrap();
 }
+
+#[test]
+fn set_owner_register() {
+    let sender = Addr::unchecked("sender");
+    let owner = Addr::unchecked("minter");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let err = contract.query_token_info(&app, 2).unwrap_err();
+    assert!(err.to_string().to_lowercase().contains("invalid token"));
+
+    contract
+        .set_owner(&mut app, &sender, Some(owner.to_string()))
+        .unwrap();
+
+    contract.register(&mut app, &owner, None, None).unwrap();
+
+    let current_supply = contract.query_token_info(&app, 2).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+}
+
+#[test]
+fn unauthorized_set_owner() {
+    let sender = Addr::unchecked("sender");
+    let owner = Addr::unchecked("owner");
+    let new_owner = Addr::unchecked("new_owner");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        Some(&owner),
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    let err = contract
+        .set_owner(&mut app, &sender, Some(new_owner.to_string()))
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::NotOwner);
+}
+
+#[test]
+fn set_owner_none() {
+    let sender = Addr::unchecked("sender");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.set_owner(&mut app, &sender, None).unwrap();
+}
