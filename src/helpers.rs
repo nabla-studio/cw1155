@@ -1,6 +1,7 @@
-use cosmwasm_std::{Addr, Env, Storage, Uint128};
+use cosmwasm_std::{Addr, Env, StdResult, Storage, Uint128};
 
 use crate::{
+    msg::BalanceResponse,
     state::{approvals, balances, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
     ContractError,
 };
@@ -212,4 +213,20 @@ pub fn update_max_supply(store: &mut dyn Storage, id: u64) -> Result<TokenInfo, 
             Ok(token_info)
         },
     )
+}
+
+/// helper function to get the balance of an account for a token.
+pub fn fetch_balance(store: &dyn Storage, owner_addr: Addr, id: u64) -> StdResult<BalanceResponse> {
+    // Load the balance of the account for the token.
+    let balance = balances()
+        .may_load(store, (owner_addr.clone(), id))?
+        .unwrap_or(Balance {
+            owner: owner_addr,
+            id,
+            amount: Uint128::new(0),
+        });
+    // Return the balance
+    Ok(BalanceResponse {
+        amount: balance.amount,
+    })
 }

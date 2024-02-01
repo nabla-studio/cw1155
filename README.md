@@ -263,7 +263,7 @@ BatchBalance {
 Response:
 ```
 BatchBalanceResponse {
-    "amount": "array[integer]"
+    "balances": "array[BalanceResponse]"
 }
 ```
 

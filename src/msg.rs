@@ -116,6 +116,11 @@ pub enum QueryMsg {
     #[returns(BalanceResponse)]
     Balance { owner: String, id: u64 },
 
+    /// BatchBalance returns the amounts in the balances for an owner and a
+    /// specific list of tokens.
+    #[returns(BatchBalanceResponse)]
+    BatchBalance { owner: String, ids: Vec<u64> },
+
     /// IsApprovedForAll returns if an operator is approved for managing all
     /// the tokens owned by an owner.
     #[returns(BalanceResponse)]
@@ -156,6 +161,12 @@ pub struct ConfigResponse {
 #[cw_serde]
 pub struct BalanceResponse {
     pub amount: Uint128,
+}
+
+/// BatchBalanceResponse holds the amounts of the balances.
+#[cw_serde]
+pub struct BatchBalanceResponse {
+    pub balances: Vec<BalanceResponse>,
 }
 
 /// IsApprovedForAllResponse holds the expiration indicating (if exists) the
