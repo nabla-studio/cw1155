@@ -176,7 +176,15 @@ pub fn decrease_current_supply(
             let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken)?;
 
             // Decrease the current supply of the token.
-            token_info.current_supply = token_info.current_supply.checked_sub(*amount)?;
+            token_info.current_supply =
+                token_info
+                    .current_supply
+                    .checked_sub(*amount)
+                    .map_err(|_| ContractError::InsufficientFunds {
+                        id: id,
+                        required: *amount,
+                        available: token_info.current_supply,
+                    })?;
 
             // Increase the burned supply of the token.
             token_info.burned = token_info.burned.checked_add(*amount)?;

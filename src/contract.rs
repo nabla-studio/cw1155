@@ -74,6 +74,7 @@ pub fn execute(
             expiration,
         } => execute::approve_all(deps, env, info, operator, expiration),
         ExecuteMsg::RevokeAll { operator } => execute::revoke_all(deps, info, operator),
+        ExecuteMsg::Burn { from, id, amount } => execute::burn(deps, info, env, from, id, amount),
     }
 }
 

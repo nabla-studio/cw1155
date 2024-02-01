@@ -48,6 +48,16 @@ pub enum ExecuteMsg {
         msg: Option<Binary>,
     },
 
+    /// Burn an already minted token.
+    Burn {
+        /// Address of the owner of the token to burn.
+        from: String,
+        /// ID of the token to burn.
+        id: u64,
+        /// Amount token elements to burn.
+        amount: Uint128,
+    },
+
     /// Approve a grants to the operator to operate on all tokens owned by the
     /// sender of the request.
     ApproveAll {
