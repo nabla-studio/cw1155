@@ -78,6 +78,12 @@ pub enum ExecuteMsg {
     /// None value indicates that the minting operation are disabled.
     /// NOTE: Once disabled, the minter address cannot be changed.
     SetMinter { minter: Option<String> },
+
+    /// Disable the minting operations for a specific token ID.
+    DisableTokenMinting {
+        /// ID of the token for which disable the minting operations.
+        id: u64,
+    },
 }
 
 #[cw_serde]

@@ -5,7 +5,8 @@ use cw_utils::Expiration;
 use crate::{
     helpers::{
         assert_can_manage, assert_minter, assert_owner, decrease_current_supply,
-        increase_current_supply, increase_registered_tokens, update_balance, BalanceAction,
+        increase_current_supply, increase_registered_tokens, update_balance, update_max_supply,
+        BalanceAction,
     },
     receiver::Cw1155ReceiveMsg,
     state::{approvals, Approval, TokenInfo, CONFIG, TOKENS},
@@ -255,6 +256,26 @@ pub fn set_minter(
     let resp = Response::default()
         .add_attribute("action", "update_minter")
         .add_attribute("new_minter", minter.unwrap_or_else(|| "None".to_string()));
+
+    Ok(resp)
+}
+
+/// Disable the ability to mint new tokens for a specific id.
+pub fn disable_token_minting(
+    deps: DepsMut,
+    info: MessageInfo,
+    id: u64,
+) -> Result<Response, ContractError> {
+    // Ensures that the message sender is the minter.
+    assert_minter(deps.storage, &info.sender)?;
+
+    // Update the max supply of the token to the current one.
+    update_max_supply(deps.storage, id)?;
+
+    // Prepare the response.
+    let resp = Response::default()
+        .add_attribute("action", "disable_token_minting")
+        .add_attribute("id", id.to_string());
 
     Ok(resp)
 }

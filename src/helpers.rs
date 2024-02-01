@@ -194,3 +194,22 @@ pub fn decrease_current_supply(
         },
     )
 }
+
+/// Update the max supply of a token to the actual current_supply. It can only
+/// happen to disable the minting operations for the token.
+pub fn update_max_supply(store: &mut dyn Storage, id: u64) -> Result<TokenInfo, ContractError> {
+    TOKENS.update(
+        store,
+        id,
+        |token_info| -> Result<TokenInfo, ContractError> {
+            // Return an error if the token does not yet exist.
+            let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken)?;
+
+            // Increase the current supply of the token.
+            token_info.max_supply = Some(token_info.current_supply);
+
+            // Save the updated token information.
+            Ok(token_info)
+        },
+    )
+}
