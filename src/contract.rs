@@ -78,6 +78,9 @@ pub fn execute(
         ExecuteMsg::SetMinter { minter } => execute::set_minter(deps, info, minter),
         ExecuteMsg::DisableTokenMinting { id } => execute::disable_token_minting(deps, info, id),
         ExecuteMsg::SetOwner { owner } => execute::set_owner(deps, info, owner),
+        ExecuteMsg::UpdateCollectionDetails { name, description } => {
+            execute::update_collection_details(deps, info, name, description)
+        }
     }
 }
 

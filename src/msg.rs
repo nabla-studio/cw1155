@@ -89,6 +89,9 @@ pub enum ExecuteMsg {
     /// None value indicates that the registering operation are disabled.
     /// NOTE: Once disabled, the owner address cannot be changed.
     SetOwner { owner: Option<String> },
+
+    /// Modify the details (name and the description) of the collection.
+    UpdateCollectionDetails { name: String, description: String },
 }
 
 #[cw_serde]

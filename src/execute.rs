@@ -308,3 +308,32 @@ pub fn set_owner(
 
     Ok(resp)
 }
+
+/// Modify the name and description of the collection.
+pub fn update_collection_details(
+    deps: DepsMut,
+    info: MessageInfo,
+    name: String,
+    description: String,
+) -> Result<Response, ContractError> {
+    // Retrieve the configuration information.
+    let mut config = CONFIG.load(deps.storage)?;
+
+    // Ensures that the message sender is the owner.
+    assert_owner(deps.storage, &info.sender)?;
+
+    // Update the name and description of the collection.
+    config.name = name.to_string();
+    config.description = description.to_string();
+
+    // Saves the newly updated token configuration.
+    CONFIG.save(deps.storage, &config)?;
+
+    // Prepare the response.
+    let resp = Response::default()
+        .add_attribute("action", "update_collection_details")
+        .add_attribute("name", name)
+        .add_attribute("description", description);
+
+    Ok(resp)
+}
