@@ -58,7 +58,7 @@ impl Cw1155 {
     }
 
     #[track_caller]
-    pub fn register_token(
+    pub fn register(
         &self,
         app: &mut App,
         sender: &Addr,
@@ -82,7 +82,7 @@ impl Cw1155 {
     }
 
     #[track_caller]
-    pub fn mint_token(
+    pub fn mint(
         &self,
         app: &mut App,
         sender: &Addr,

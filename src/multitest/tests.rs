@@ -142,7 +142,7 @@ fn register_max_supply_and_is_transferrable_token() {
     .unwrap();
 
     contract
-        .register_token(&mut app, &sender, Uint128::from(1000u128), true)
+        .register(&mut app, &sender, Uint128::from(1000u128), true)
         .unwrap();
 
     let token_count = contract
@@ -176,7 +176,7 @@ fn register_max_supply_and_is_not_transferrable_token() {
     .unwrap();
 
     contract
-        .register_token(&mut app, &sender, Uint128::from(1u128), false)
+        .register(&mut app, &sender, Uint128::from(1u128), false)
         .unwrap();
 
     let token_count = contract
@@ -210,7 +210,7 @@ fn register_max_supply_zero_token() {
     .unwrap();
 
     let err = contract
-        .register_token(&mut app, &sender, Uint128::from(0u128), None)
+        .register(&mut app, &sender, Uint128::from(0u128), None)
         .unwrap_err();
 
     assert_eq!(err, ContractError::ZeroMaxSupply {});
@@ -245,9 +245,7 @@ fn get_one_registered_token() {
     )
     .unwrap();
 
-    contract
-        .register_token(&mut app, &sender, None, None)
-        .unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
 
     let token_count = contract
         .query_contract_info(&app)
@@ -258,7 +256,7 @@ fn get_one_registered_token() {
 }
 
 #[test]
-fn unauthorized_register_token() {
+fn unauthorized_register() {
     let sender = Addr::unchecked("sender");
     let owner = Addr::unchecked("owner");
 
@@ -281,7 +279,7 @@ fn unauthorized_register_token() {
     .unwrap();
 
     let err = contract
-        .register_token(&mut app, &sender, None, None)
+        .register(&mut app, &sender, None, None)
         .unwrap_err();
 
     assert_eq!(err, ContractError::NotOwner {});
@@ -295,7 +293,7 @@ fn unauthorized_register_token() {
 }
 
 #[test]
-fn mint_token() {
+fn mint() {
     let sender = Addr::unchecked("sender");
     let recipient = Addr::unchecked("recipient");
 
@@ -317,15 +315,13 @@ fn mint_token() {
     )
     .unwrap();
 
-    contract
-        .register_token(&mut app, &sender, None, None)
-        .unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
 
     let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
-        .mint_token(
+        .mint(
             &mut app,
             &sender,
             recipient.as_str(),
@@ -369,15 +365,13 @@ fn unauthorized_mint() {
     )
     .unwrap();
 
-    contract
-        .register_token(&mut app, &sender, None, None)
-        .unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
 
     let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     let err = contract
-        .mint_token(
+        .mint(
             &mut app,
             &recipient,
             recipient.as_str(),
@@ -424,14 +418,14 @@ fn try_overcome_max_supply() {
     .unwrap();
 
     contract
-        .register_token(&mut app, &sender, Uint128::from(20u128), None)
+        .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
     let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     let err = contract
-        .mint_token(
+        .mint(
             &mut app,
             &sender,
             recipient.as_str(),
@@ -471,14 +465,14 @@ fn multiple_mint() {
     .unwrap();
 
     contract
-        .register_token(&mut app, &sender, Uint128::from(20u128), None)
+        .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
     let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
-        .mint_token(
+        .mint(
             &mut app,
             &sender,
             recipient.as_str(),
@@ -492,7 +486,7 @@ fn multiple_mint() {
     assert_eq!(current_supply, Uint128::from(10u128));
 
     contract
-        .mint_token(
+        .mint(
             &mut app,
             &sender,
             recipient.as_str(),
@@ -506,7 +500,7 @@ fn multiple_mint() {
     assert_eq!(current_supply, Uint128::from(20u128));
 
     let err = contract
-        .mint_token(
+        .mint(
             &mut app,
             &sender,
             recipient.as_str(),
@@ -544,14 +538,14 @@ fn mint_multiple_recipients() {
     .unwrap();
 
     contract
-        .register_token(&mut app, &sender, Uint128::from(20u128), None)
+        .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
     let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
-        .mint_token(
+        .mint(
             &mut app,
             &sender,
             recipient1.as_str(),
@@ -565,7 +559,7 @@ fn mint_multiple_recipients() {
     assert_eq!(current_supply, Uint128::from(8u128));
 
     contract
-        .mint_token(
+        .mint(
             &mut app,
             &sender,
             recipient2.as_str(),
