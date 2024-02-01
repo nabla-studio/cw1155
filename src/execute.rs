@@ -8,7 +8,7 @@ use crate::{
         increase_current_supply, increase_registered_tokens, update_balance, BalanceAction,
     },
     receiver::Cw1155ReceiveMsg,
-    state::{approvals, Approval, TokenInfo, TOKENS},
+    state::{approvals, Approval, TokenInfo, CONFIG, TOKENS},
     ContractError,
 };
 
@@ -116,7 +116,7 @@ pub fn burn(
     id: u64,
     amount: Uint128,
 ) -> Result<Response, ContractError> {
-    // Validates the receiver's address.
+    // Validates the sender's address.
     let from_addr = deps.api.addr_validate(&from)?;
 
     // Ensures that the message sender can manage the tokens.
@@ -226,6 +226,35 @@ pub fn revoke_all(
         .add_attribute("action", "revoke_all")
         .add_attribute("owner", &info.sender)
         .add_attribute("operator", &operator);
+
+    Ok(resp)
+}
+
+/// Modify the address of who can perform minting operations.
+pub fn set_minter(
+    deps: DepsMut,
+    info: MessageInfo,
+    minter: Option<String>,
+) -> Result<Response, ContractError> {
+    // Retrieve the configuration information.
+    let mut config = CONFIG.load(deps.storage)?;
+
+    // Ensures that the message sender is a minter.
+    assert_minter(deps.storage, &info.sender)?;
+
+    // Check the new minter's address and use it if valid.
+    config.minter = match minter.clone() {
+        Some(minter) => Some(deps.api.addr_validate(&minter)?),
+        None => None,
+    };
+
+    // Saves the newly updated token configuration.
+    CONFIG.save(deps.storage, &config)?;
+
+    // Prepare the response.
+    let resp = Response::default()
+        .add_attribute("action", "update_minter")
+        .add_attribute("new_minter", minter.unwrap_or_else(|| "None".to_string()));
 
     Ok(resp)
 }

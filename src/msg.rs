@@ -73,6 +73,11 @@ pub enum ExecuteMsg {
         /// Address of the operator.
         operator: String,
     },
+
+    /// Modify the address of who can perform minting operations.
+    /// None value indicates that the minting operation are disabled.
+    /// NOTE: Once disabled, the minter address cannot be changed.
+    SetMinter { minter: Option<String> },
 }
 
 #[cw_serde]
