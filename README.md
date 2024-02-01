@@ -178,7 +178,7 @@ Modify the address of who can perform minting operations.
 
 ```
 SetMinter {
-    "minter*": "string"
+    "minter": Option<"string">
 }
 ```
 Parameter:
@@ -205,7 +205,7 @@ Modify the address of who can perform registering operations.
 
 ```
 SetOwner {
-    "owner*": "string"
+    "owner*": Option<"string">
 }
 ```
 Parameter:
