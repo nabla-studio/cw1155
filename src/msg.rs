@@ -58,6 +58,20 @@ pub enum ExecuteMsg {
         amount: Uint128,
     },
 
+    /// Transfer an already minted token.
+    TransferFrom {
+        /// Address of the owner of the token to transfer.
+        from: String,
+        /// Address of the recipient.
+        to: String,
+        /// ID of the token to transfer.
+        id: u64,
+        /// Amount token elements to transfer.
+        amount: Uint128,
+        /// Message for smart contract recipients.
+        msg: Option<Binary>,
+    },
+
     /// Approve a grants to the operator to operate on all tokens owned by the
     /// sender of the request.
     ApproveAll {

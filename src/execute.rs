@@ -139,6 +139,54 @@ pub fn burn(
     Ok(resp)
 }
 
+// Transfer a specified quantity of a token from a holder's address to a
+// recipient's address.
+pub fn transfer_from(
+    deps: DepsMut,
+    info: MessageInfo,
+    env: Env,
+    from: String,
+    to: String,
+    id: u64,
+    amount: Uint128,
+    msg: Option<Binary>,
+) -> Result<Response, ContractError> {
+    // Validates the sender's address.
+    let from_addr = deps.api.addr_validate(&from)?;
+    // Validates the receiver's address.
+    let to_addr = deps.api.addr_validate(&to)?;
+
+    // Ensures that the message sender can manage the tokens.
+    assert_can_manage(deps.storage, &env, from_addr.clone(), info.sender.clone())?;
+
+    // Executes the transfer of the minted tokens to the specified address.
+    exec_transfer(deps, Some(from_addr), Some(to_addr), id, amount)?;
+
+    // Initialize a response with basic tranferring attributes.
+    let mut resp = Response::default()
+        .add_attribute("action", "transfer_from")
+        .add_attribute("from", &from)
+        .add_attribute("to", &to)
+        .add_attribute("id", id.to_string())
+        .add_attribute("amount", amount);
+
+    // If a message is provided, create a Cw1155ReceiveMsg and add it to the response.
+    if let Some(msg) = msg {
+        resp = resp.add_message(
+            Cw1155ReceiveMsg {
+                operator: info.sender.to_string(),
+                from: Some(from),
+                id,
+                amount,
+                msg,
+            }
+            .into_cosmos_msg(to)?,
+        );
+    }
+
+    Ok(resp)
+}
+
 // Internal function to handle the transfer of tokens.
 // From None: Mint
 // To None: Burn
