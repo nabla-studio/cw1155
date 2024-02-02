@@ -1,9 +1,11 @@
+use std::vec;
+
 use cosmwasm_std::{Addr, Uint128};
 use cw_multi_test::App;
 use cw_utils::Expiration;
 
 use crate::{
-    msg::{ConfigResponse, IsApprovedForAllResponse},
+    msg::{BalanceResponse, BatchBalanceResponse, ConfigResponse, IsApprovedForAllResponse},
     state::TokenInfo,
     ContractError,
 };
@@ -2294,4 +2296,137 @@ fn unauthorized_update_collection() {
         .unwrap_err();
 
     assert_eq!(err, ContractError::NotOwner);
+}
+
+#[test]
+fn batch_balances() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient2 = Addr::unchecked("recipient2");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+    let current_supply = contract.query_token_info(&app, 2).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+    let current_supply = contract.query_token_info(&app, 3).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            1,
+            Uint128::from(11u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            2,
+            Uint128::from(22u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient2.as_str(),
+            2,
+            Uint128::from(22u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient2.as_str(),
+            3,
+            Uint128::from(33u128),
+            None,
+        )
+        .unwrap();
+
+    let recipient1_balances = contract
+        .query_batch_balance(&app, recipient1.into_string(), vec![1, 2, 3])
+        .unwrap();
+
+    assert_eq!(
+        recipient1_balances,
+        BatchBalanceResponse {
+            balances: vec![
+                BalanceResponse {
+                    amount: Uint128::from(11u128)
+                },
+                BalanceResponse {
+                    amount: Uint128::from(22u128)
+                },
+                BalanceResponse {
+                    amount: Uint128::zero()
+                }
+            ]
+        }
+    );
+
+    let recipient2_balances = contract
+        .query_batch_balance(&app, recipient2.clone().into_string(), vec![1, 2, 3])
+        .unwrap();
+
+    assert_eq!(
+        recipient2_balances,
+        BatchBalanceResponse {
+            balances: vec![
+                BalanceResponse {
+                    amount: Uint128::zero()
+                },
+                BalanceResponse {
+                    amount: Uint128::from(22u128)
+                },
+                BalanceResponse {
+                    amount: Uint128::from(33u128)
+                }
+            ]
+        }
+    );
+
+    let err = contract
+        .query_batch_balance(&app, recipient2.into_string(), vec![1, 2, 3, 4])
+        .unwrap_err();
+
+    assert!(err
+        .to_string()
+        .to_lowercase()
+        .contains("no token with id 4"));
 }

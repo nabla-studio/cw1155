@@ -4,7 +4,8 @@ use cw_utils::Expiration;
 
 use crate::contract::{execute, instantiate, query};
 use crate::msg::{
-    BalanceResponse, ConfigResponse, ExecuteMsg, InstantiateMsg, IsApprovedForAllResponse, QueryMsg,
+    BalanceResponse, BatchBalanceResponse, ConfigResponse, ExecuteMsg, InstantiateMsg,
+    IsApprovedForAllResponse, QueryMsg,
 };
 use crate::state::TokenInfo;
 use crate::ContractError;
@@ -286,6 +287,17 @@ impl Cw1155 {
     pub fn query_balance(&self, app: &App, owner: String, id: u64) -> StdResult<BalanceResponse> {
         app.wrap()
             .query_wasm_smart(self.0.clone(), &QueryMsg::Balance { owner, id })
+    }
+
+    #[track_caller]
+    pub fn query_batch_balance(
+        &self,
+        app: &App,
+        owner: String,
+        ids: Vec<u64>,
+    ) -> StdResult<BatchBalanceResponse> {
+        app.wrap()
+            .query_wasm_smart(self.0.clone(), &QueryMsg::BatchBalance { owner, ids })
     }
 
     #[track_caller]
