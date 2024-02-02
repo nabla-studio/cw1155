@@ -219,6 +219,23 @@ impl Cw1155 {
     }
 
     #[track_caller]
+    pub fn disable_token_minting(
+        &self,
+        app: &mut App,
+        sender: &Addr,
+        id: u64,
+    ) -> Result<(), ContractError> {
+        app.execute_contract(
+            sender.clone(),
+            self.0.clone(),
+            &ExecuteMsg::DisableTokenMinting { id },
+            &[],
+        )
+        .map_err(|err| err.downcast().unwrap())
+        .map(|_| ())
+    }
+
+    #[track_caller]
     pub fn set_owner(
         &self,
         app: &mut App,

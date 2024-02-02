@@ -1915,3 +1915,227 @@ fn set_owner_none() {
 
     contract.set_owner(&mut app, &sender, None).unwrap();
 }
+
+#[test]
+fn mint_disable_minting() {
+    let sender = Addr::unchecked("sender");
+    let recipient = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    contract
+        .disable_token_minting(&mut app, &sender, 1)
+        .unwrap();
+
+    let err = contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::CannotExceedMaxSupply);
+
+    let user_balance = contract
+        .query_balance(&app, recipient.into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(user_balance, Uint128::from(10u128));
+}
+
+#[test]
+fn mint_burn_disable_minting() {
+    let sender = Addr::unchecked("sender");
+    let recipient = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    contract
+        .burn(
+            &mut app,
+            &recipient,
+            recipient.as_str(),
+            1,
+            Uint128::from(3u128),
+        )
+        .unwrap();
+
+    contract
+        .disable_token_minting(&mut app, &sender, 1)
+        .unwrap();
+
+    let err = contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(3u128),
+            None,
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::CannotExceedMaxSupply);
+
+    let user_balance = contract
+        .query_balance(&app, recipient.into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(user_balance, Uint128::from(7u128));
+}
+
+#[test]
+fn mint_disable_minting_burn() {
+    let sender = Addr::unchecked("sender");
+    let recipient = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::zero());
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(10u128),
+            None,
+        )
+        .unwrap();
+
+    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    assert_eq!(current_supply, Uint128::from(10u128));
+
+    contract
+        .disable_token_minting(&mut app, &sender, 1)
+        .unwrap();
+
+    contract
+        .burn(
+            &mut app,
+            &recipient,
+            recipient.as_str(),
+            1,
+            Uint128::from(3u128),
+        )
+        .unwrap();
+
+    let err = contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient.as_str(),
+            1,
+            Uint128::from(3u128),
+            None,
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::CannotExceedMaxSupply);
+
+    let user_balance = contract
+        .query_balance(&app, recipient.into_string(), 1)
+        .unwrap()
+        .amount;
+
+    assert_eq!(user_balance, Uint128::from(7u128));
+}
