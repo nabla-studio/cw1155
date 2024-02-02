@@ -39,6 +39,12 @@ pub fn query_balance(deps: Deps, owner: String, id: u64) -> Result<BalanceRespon
     // Validate the owner address.
     let owner_addr = deps.api.addr_validate(&owner)?;
 
+    // Return invalid token if the token is not registered.
+    let max_token_id = REGISTERED_TOKENS.load(deps.storage)?;
+    if id > max_token_id {
+        return Err(ContractError::InvalidToken);
+    }
+
     // Fetch the balance using the helper function.
     fetch_balance(deps.storage, owner_addr, id)
 }
@@ -52,10 +58,16 @@ pub fn query_batch_balance(
     // Validate the owner address.
     let owner_addr = deps.api.addr_validate(&owner)?;
 
+    // Return invalid token if the token is not registered.
+    let max_token_id = REGISTERED_TOKENS.load(deps.storage)?;
+
     // Fetch balances for all IDs, collecting any errors.
     let balances = ids
         .into_iter()
         .map(|id| -> Result<_, ContractError> {
+            if id > max_token_id {
+                return Err(ContractError::InvalidToken);
+            }
             fetch_balance(deps.storage, owner_addr.clone(), id)
         })
         .collect::<Result<_, ContractError>>()?;

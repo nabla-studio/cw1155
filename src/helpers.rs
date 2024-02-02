@@ -221,11 +221,6 @@ pub fn fetch_balance(
     owner_addr: Addr,
     id: u64,
 ) -> Result<BalanceResponse, ContractError> {
-    // Return invalid token if the token is not registered.
-    if TOKENS.may_load(store, id)?.is_none() {
-        return Err(ContractError::InvalidToken);
-    }
-
     // Load the balance of the account for the token.
     let balance = balances()
         .may_load(store, (owner_addr.clone(), id))?
