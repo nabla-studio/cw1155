@@ -123,7 +123,7 @@ pub enum QueryMsg {
 
     /// IsApprovedForAll returns if an operator is approved for managing all
     /// the tokens owned by an owner.
-    #[returns(BalanceResponse)]
+    #[returns(IsApprovedForAllResponse)]
     IsApprovedForAll { owner: String, operator: String },
 
     /// Config returns the current information about the contract and the
