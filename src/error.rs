@@ -36,8 +36,8 @@ pub enum ContractError {
     #[error("Minting cannot exceed the maximum supply")]
     CannotExceedMaxSupply,
 
-    #[error("Invalid token ID. No token with that ID was already registered")]
-    InvalidToken,
+    #[error("Invalid token ID. No token with ID {id} was already registered")]
+    InvalidToken { id: u64 },
 
     #[error("The provided expiration has already expired")]
     Expired,

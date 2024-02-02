@@ -30,7 +30,7 @@ pub fn query_token_info(deps: Deps, id: u64) -> Result<TokenInfo, ContractError>
     // Load token information by token ID from the storage.
     match TOKENS.may_load(deps.storage, id)? {
         Some(token_info) => Ok(token_info),
-        None => return Err(ContractError::InvalidToken),
+        None => return Err(ContractError::InvalidToken { id }),
     }
 }
 
@@ -42,7 +42,7 @@ pub fn query_balance(deps: Deps, owner: String, id: u64) -> Result<BalanceRespon
     // Return invalid token if the token is not registered.
     let max_token_id = REGISTERED_TOKENS.load(deps.storage)?;
     if id > max_token_id {
-        return Err(ContractError::InvalidToken);
+        return Err(ContractError::InvalidToken { id });
     }
 
     // Fetch the balance using the helper function.
@@ -66,7 +66,7 @@ pub fn query_batch_balance(
         .into_iter()
         .map(|id| -> Result<_, ContractError> {
             if id > max_token_id {
-                return Err(ContractError::InvalidToken);
+                return Err(ContractError::InvalidToken { id });
             }
             fetch_balance(deps.storage, owner_addr.clone(), id)
         })

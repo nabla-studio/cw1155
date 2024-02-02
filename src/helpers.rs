@@ -135,7 +135,7 @@ pub fn increase_current_supply(
         id,
         |token_info| -> Result<TokenInfo, ContractError> {
             // Return an error if the token does not yet exist.
-            let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken)?;
+            let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken { id })?;
 
             // Increase the current supply of the token.
             token_info.current_supply = token_info.current_supply.checked_add(*amount)?;
@@ -174,7 +174,7 @@ pub fn decrease_current_supply(
         id,
         |token_info| -> Result<TokenInfo, ContractError> {
             // Return an error if the token does not yet exist.
-            let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken)?;
+            let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken { id })?;
 
             // Decrease the current supply of the token.
             token_info.current_supply =
@@ -204,7 +204,7 @@ pub fn update_max_supply(store: &mut dyn Storage, id: u64) -> Result<TokenInfo, 
         id,
         |token_info| -> Result<TokenInfo, ContractError> {
             // Return an error if the token does not yet exist.
-            let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken)?;
+            let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken { id })?;
 
             // Increase the current supply of the token.
             token_info.max_supply = Some(token_info.current_supply.checked_add(token_info.burned)?);
