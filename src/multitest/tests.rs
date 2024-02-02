@@ -2206,3 +2206,92 @@ fn mint_disable_minting_burn() {
 
     assert_eq!(user_balance, Uint128::from(7u128));
 }
+
+#[test]
+fn update_collection() {
+    let sender = Addr::unchecked("sender");
+    let owner = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        Some(&owner),
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    let ConfigResponse {
+        name, description, ..
+    } = contract.query_contract_info(&app).unwrap();
+
+    assert_eq!(name, NAME);
+    assert_eq!(description, DESCRIPTION);
+
+    contract
+        .update_collection_details(
+            &mut app,
+            &owner,
+            NAME.to_string() + " updated",
+            DESCRIPTION.to_string() + " updated",
+        )
+        .unwrap();
+
+    let ConfigResponse {
+        name, description, ..
+    } = contract.query_contract_info(&app).unwrap();
+
+    assert_eq!(name, NAME.to_string() + " updated");
+    assert_eq!(description, DESCRIPTION.to_string() + " updated");
+}
+
+#[test]
+fn unauthorized_update_collection() {
+    let sender = Addr::unchecked("sender");
+    let owner = Addr::unchecked("recipient");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        Some(&owner),
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    let ConfigResponse {
+        name, description, ..
+    } = contract.query_contract_info(&app).unwrap();
+
+    assert_eq!(name, NAME);
+    assert_eq!(description, DESCRIPTION);
+
+    let err = contract
+        .update_collection_details(
+            &mut app,
+            &sender,
+            NAME.to_string() + " updated",
+            DESCRIPTION.to_string() + " updated",
+        )
+        .unwrap_err();
+
+    assert_eq!(err, ContractError::NotOwner);
+}
