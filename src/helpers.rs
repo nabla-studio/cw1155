@@ -207,7 +207,7 @@ pub fn update_max_supply(store: &mut dyn Storage, id: u64) -> Result<TokenInfo, 
             let mut token_info: TokenInfo = token_info.ok_or(ContractError::InvalidToken)?;
 
             // Increase the current supply of the token.
-            token_info.max_supply = Some(token_info.current_supply);
+            token_info.max_supply = Some(token_info.current_supply.checked_add(token_info.burned)?);
 
             // Save the updated token information.
             Ok(token_info)
