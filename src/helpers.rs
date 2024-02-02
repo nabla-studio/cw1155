@@ -1,7 +1,6 @@
 use cosmwasm_std::{Addr, Env, Storage, Uint128};
 
 use crate::{
-    msg::BalanceResponse,
     state::{approvals, balances, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
     ContractError,
 };
@@ -220,7 +219,7 @@ pub fn fetch_balance(
     store: &dyn Storage,
     owner_addr: Addr,
     id: u64,
-) -> Result<BalanceResponse, ContractError> {
+) -> Result<Uint128, ContractError> {
     // Load the balance of the account for the token.
     let balance = balances()
         .may_load(store, (owner_addr.clone(), id))?
@@ -230,7 +229,5 @@ pub fn fetch_balance(
             amount: Uint128::new(0),
         });
     // Return the balance
-    Ok(BalanceResponse {
-        amount: balance.amount,
-    })
+    Ok(balance.amount)
 }

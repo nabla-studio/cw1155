@@ -1,8 +1,9 @@
-use cosmwasm_std::{Deps, StdResult};
+use cosmwasm_std::{Deps, StdResult, Uint128};
+use cw_utils::Expiration;
 
 use crate::{
     helpers::fetch_balance,
-    msg::{BalanceResponse, BatchBalanceResponse, ConfigResponse, IsApprovedForAllResponse},
+    msg::ConfigResponse,
     state::{approvals, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
     ContractError,
 };
@@ -35,7 +36,7 @@ pub fn query_token_info(deps: Deps, id: u64) -> Result<TokenInfo, ContractError>
 }
 
 // Query the balance of a specific token for a given owner.
-pub fn query_balance(deps: Deps, owner: String, id: u64) -> Result<BalanceResponse, ContractError> {
+pub fn query_balance(deps: Deps, owner: String, id: u64) -> Result<Uint128, ContractError> {
     // Validate the owner address.
     let owner_addr = deps.api.addr_validate(&owner)?;
 
@@ -54,7 +55,7 @@ pub fn query_batch_balance(
     deps: Deps,
     owner: String,
     ids: Vec<u64>,
-) -> Result<BatchBalanceResponse, ContractError> {
+) -> Result<Vec<Uint128>, ContractError> {
     // Validate the owner address.
     let owner_addr = deps.api.addr_validate(&owner)?;
 
@@ -73,7 +74,7 @@ pub fn query_batch_balance(
         .collect::<Result<_, ContractError>>()?;
 
     // Return the batch balance response.
-    Ok(BatchBalanceResponse { balances })
+    Ok(balances)
 }
 
 // Query if an operator is approved to manage all of an owner's tokens.
@@ -81,7 +82,7 @@ pub fn query_approved_for_all(
     deps: Deps,
     owner: String,
     operator: String,
-) -> StdResult<IsApprovedForAllResponse> {
+) -> StdResult<Option<Expiration>> {
     // Validate the owner and operator addresses.
     let owner_addr = deps.api.addr_validate(&owner)?;
     let operator_addr = deps.api.addr_validate(&operator)?;
@@ -92,5 +93,5 @@ pub fn query_approved_for_all(
         .map(|approval| approval.expiration);
 
     // Return the approval status.
-    Ok(IsApprovedForAllResponse { expiration })
+    Ok(expiration)
 }

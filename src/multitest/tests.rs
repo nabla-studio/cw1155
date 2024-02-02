@@ -4,11 +4,7 @@ use cosmwasm_std::{Addr, Uint128};
 use cw_multi_test::App;
 use cw_utils::Expiration;
 
-use crate::{
-    msg::{BalanceResponse, BatchBalanceResponse, ConfigResponse, IsApprovedForAllResponse},
-    state::TokenInfo,
-    ContractError,
-};
+use crate::{msg::ConfigResponse, state::TokenInfo, ContractError};
 
 use super::contract::Cw1155;
 
@@ -339,8 +335,7 @@ fn mint() {
 
     let user_balance = contract
         .query_balance(&app, recipient.into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(10u128));
 }
@@ -391,8 +386,7 @@ fn unauthorized_mint() {
 
     let user_balance = contract
         .query_balance(&app, recipient.into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::zero());
 }
@@ -577,15 +571,13 @@ fn mint_multiple_recipients() {
 
     let recipient1_balance = contract
         .query_balance(&app, recipient1.into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient1_balance, Uint128::from(8u128));
 
     let recipient2_balance = contract
         .query_balance(&app, recipient2.into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient2_balance, Uint128::from(12u128));
 }
@@ -631,19 +623,14 @@ fn alice_approve_bob() {
 
     assert_eq!(
         bob_alice_approvals,
-        IsApprovedForAllResponse {
-            expiration: Some(Expiration::AtHeight(start_time + 1))
-        }
+        Some(Expiration::AtHeight(start_time + 1))
     );
 
     let sender_alice_approvals = contract
         .query_is_approved_for_all(&app, sender.into_string(), bob.into_string())
         .unwrap();
 
-    assert_eq!(
-        sender_alice_approvals,
-        IsApprovedForAllResponse { expiration: None }
-    );
+    assert_eq!(sender_alice_approvals, None);
 }
 
 #[test]
@@ -687,10 +674,7 @@ fn expired_approve() {
         .query_is_approved_for_all(&app, alice.into_string(), bob.clone().into_string())
         .unwrap();
 
-    assert_eq!(
-        bob_alice_approvals,
-        IsApprovedForAllResponse { expiration: None }
-    );
+    assert_eq!(bob_alice_approvals, None);
 }
 
 #[test]
@@ -743,21 +727,14 @@ fn alice_multiple_approve() {
 
     assert_eq!(
         bob_alice_approvals,
-        IsApprovedForAllResponse {
-            expiration: Some(Expiration::AtHeight(start_time + 1))
-        }
+        Some(Expiration::AtHeight(start_time + 1))
     );
 
     let sender_alice_approvals = contract
         .query_is_approved_for_all(&app, alice.into_string(), sender.into_string())
         .unwrap();
 
-    assert_eq!(
-        sender_alice_approvals,
-        IsApprovedForAllResponse {
-            expiration: Some(Expiration::Never {})
-        }
-    );
+    assert_eq!(sender_alice_approvals, Some(Expiration::Never {}));
 }
 
 #[test]
@@ -810,9 +787,7 @@ fn alice_revoke() {
 
     assert_eq!(
         bob_alice_approvals,
-        IsApprovedForAllResponse {
-            expiration: Some(Expiration::AtHeight(start_time + 1))
-        }
+        Some(Expiration::AtHeight(start_time + 1))
     );
 
     let sender_alice_approvals = contract
@@ -823,12 +798,7 @@ fn alice_revoke() {
         )
         .unwrap();
 
-    assert_eq!(
-        sender_alice_approvals,
-        IsApprovedForAllResponse {
-            expiration: Some(Expiration::Never {})
-        }
-    );
+    assert_eq!(sender_alice_approvals, Some(Expiration::Never {}));
 
     contract
         .revoke_all(&mut app, &alice, sender.as_str())
@@ -840,19 +810,14 @@ fn alice_revoke() {
 
     assert_eq!(
         bob_alice_approvals,
-        IsApprovedForAllResponse {
-            expiration: Some(Expiration::AtHeight(start_time + 1))
-        }
+        Some(Expiration::AtHeight(start_time + 1))
     );
 
     let sender_alice_approvals = contract
         .query_is_approved_for_all(&app, alice.into_string(), sender.into_string())
         .unwrap();
 
-    assert_eq!(
-        sender_alice_approvals,
-        IsApprovedForAllResponse { expiration: None }
-    );
+    assert_eq!(sender_alice_approvals, None);
 }
 
 #[test]
@@ -899,8 +864,7 @@ fn burn() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(10u128));
 
@@ -924,8 +888,7 @@ fn burn() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(7u128));
 }
@@ -974,8 +937,7 @@ fn unauthorized_burn() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(10u128));
 
@@ -1001,8 +963,7 @@ fn unauthorized_burn() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(10u128));
 }
@@ -1092,8 +1053,7 @@ fn approved_burn() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(10u128));
 
@@ -1126,8 +1086,7 @@ fn approved_burn() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(7u128));
 }
@@ -1187,8 +1146,7 @@ fn too_much_to_burn() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(10u128));
 
@@ -1221,8 +1179,7 @@ fn too_much_to_burn() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(10u128));
 }
@@ -1294,15 +1251,13 @@ fn transfer_from() {
 
     let recipient1_balance = contract
         .query_balance(&app, recipient1.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient1_balance, Uint128::from(5u128));
 
     let recipient2_balance = contract
         .query_balance(&app, recipient2.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient2_balance, Uint128::from(5u128));
 }
@@ -1368,8 +1323,7 @@ fn unauthorized_transfer_from() {
 
     let recipient1_balance = contract
         .query_balance(&app, recipient1.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient1_balance, Uint128::from(10u128));
 }
@@ -1435,8 +1389,7 @@ fn unallowed_transfer_from() {
 
     let recipient1_balance = contract
         .query_balance(&app, recipient1.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient1_balance, Uint128::from(10u128));
 }
@@ -1509,15 +1462,13 @@ fn authorized_transfer_from() {
 
     let recipient1_balance = contract
         .query_balance(&app, recipient1.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient1_balance, Uint128::from(5u128));
 
     let recipient2_balance = contract
         .query_balance(&app, recipient2.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient2_balance, Uint128::from(5u128));
 }
@@ -1650,15 +1601,13 @@ fn transfer_zero() {
 
     let recipient1_balance = contract
         .query_balance(&app, recipient1.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient1_balance, Uint128::from(10u128));
 
     let recipient2_balance = contract
         .query_balance(&app, recipient2.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient2_balance, Uint128::zero());
 }
@@ -1721,8 +1670,7 @@ fn auto_transfer() {
 
     let recipient1_balance = contract
         .query_balance(&app, recipient1.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(recipient1_balance, Uint128::from(10u128));
 }
@@ -1772,8 +1720,7 @@ fn set_minter_mint() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(10u128));
 
@@ -1797,8 +1744,7 @@ fn set_minter_mint() {
 
     let user_balance = contract
         .query_balance(&app, recipient.clone().into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(20u128));
 
@@ -2047,8 +1993,7 @@ fn mint_disable_minting() {
 
     let user_balance = contract
         .query_balance(&app, recipient.into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(10u128));
 }
@@ -2125,8 +2070,7 @@ fn mint_burn_disable_minting() {
 
     let user_balance = contract
         .query_balance(&app, recipient.into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(7u128));
 }
@@ -2203,8 +2147,7 @@ fn mint_disable_minting_burn() {
 
     let user_balance = contract
         .query_balance(&app, recipient.into_string(), 1)
-        .unwrap()
-        .amount;
+        .unwrap();
 
     assert_eq!(user_balance, Uint128::from(7u128));
 }
@@ -2385,19 +2328,11 @@ fn batch_balances() {
 
     assert_eq!(
         recipient1_balances,
-        BatchBalanceResponse {
-            balances: vec![
-                BalanceResponse {
-                    amount: Uint128::from(11u128)
-                },
-                BalanceResponse {
-                    amount: Uint128::from(22u128)
-                },
-                BalanceResponse {
-                    amount: Uint128::zero()
-                }
-            ]
-        }
+        vec![
+            Uint128::from(11u128),
+            Uint128::from(22u128),
+            Uint128::zero()
+        ]
     );
 
     let recipient2_balances = contract
@@ -2406,19 +2341,11 @@ fn batch_balances() {
 
     assert_eq!(
         recipient2_balances,
-        BatchBalanceResponse {
-            balances: vec![
-                BalanceResponse {
-                    amount: Uint128::zero()
-                },
-                BalanceResponse {
-                    amount: Uint128::from(22u128)
-                },
-                BalanceResponse {
-                    amount: Uint128::from(33u128)
-                }
-            ]
-        }
+        vec![
+            Uint128::zero(),
+            Uint128::from(22u128),
+            Uint128::from(33u128)
+        ]
     );
 
     let err = contract

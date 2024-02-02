@@ -113,17 +113,17 @@ pub enum ExecuteMsg {
 pub enum QueryMsg {
     /// Balance returns the amount in the balance for an owner and a specific
     /// token.
-    #[returns(BalanceResponse)]
+    #[returns(Uint128)]
     Balance { owner: String, id: u64 },
 
     /// BatchBalance returns the amounts in the balances for an owner and a
     /// specific list of tokens.
-    #[returns(BatchBalanceResponse)]
+    #[returns(Vec<Uint128>)]
     BatchBalance { owner: String, ids: Vec<u64> },
 
     /// IsApprovedForAll returns if an operator is approved for managing all
     /// the tokens owned by an owner.
-    #[returns(IsApprovedForAllResponse)]
+    #[returns(Option<Expiration>)]
     IsApprovedForAll { owner: String, operator: String },
 
     /// Config returns the current information about the contract and the
@@ -155,24 +155,4 @@ pub struct ConfigResponse {
 
     /// Collection description.
     pub description: String,
-}
-
-/// BalanceResponse holds the amount of a balance.
-#[cw_serde]
-pub struct BalanceResponse {
-    pub amount: Uint128,
-}
-
-/// BatchBalanceResponse holds the amounts of the balances.
-#[cw_serde]
-pub struct BatchBalanceResponse {
-    pub balances: Vec<BalanceResponse>,
-}
-
-/// IsApprovedForAllResponse holds the expiration indicating (if exists) the
-/// expiring date for the grant.
-#[cw_serde]
-pub struct IsApprovedForAllResponse {
-    // None implies that the grant is not present.
-    pub expiration: Option<Expiration>,
 }

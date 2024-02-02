@@ -3,10 +3,7 @@ use cw_multi_test::{App, ContractWrapper, Executor};
 use cw_utils::Expiration;
 
 use crate::contract::{execute, instantiate, query};
-use crate::msg::{
-    BalanceResponse, BatchBalanceResponse, ConfigResponse, ExecuteMsg, InstantiateMsg,
-    IsApprovedForAllResponse, QueryMsg,
-};
+use crate::msg::{ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
 use crate::state::TokenInfo;
 use crate::ContractError;
 
@@ -284,7 +281,7 @@ impl Cw1155 {
     }
 
     #[track_caller]
-    pub fn query_balance(&self, app: &App, owner: String, id: u64) -> StdResult<BalanceResponse> {
+    pub fn query_balance(&self, app: &App, owner: String, id: u64) -> StdResult<Uint128> {
         app.wrap()
             .query_wasm_smart(self.0.clone(), &QueryMsg::Balance { owner, id })
     }
@@ -295,7 +292,7 @@ impl Cw1155 {
         app: &App,
         owner: String,
         ids: Vec<u64>,
-    ) -> StdResult<BatchBalanceResponse> {
+    ) -> StdResult<Vec<Uint128>> {
         app.wrap()
             .query_wasm_smart(self.0.clone(), &QueryMsg::BatchBalance { owner, ids })
     }
@@ -306,7 +303,7 @@ impl Cw1155 {
         app: &App,
         owner: String,
         operator: String,
-    ) -> StdResult<IsApprovedForAllResponse> {
+    ) -> StdResult<Option<Expiration>> {
         app.wrap().query_wasm_smart(
             self.0.clone(),
             &QueryMsg::IsApprovedForAll { owner, operator },
