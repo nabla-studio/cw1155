@@ -39,6 +39,9 @@ pub enum ContractError {
     #[error("Invalid token ID. No token with ID {id} was already registered")]
     InvalidToken { id: u64 },
 
+    #[error("Token with ID {id} is not transferrable")]
+    NotTransferrable { id: u64 },
+
     #[error("The provided expiration has already expired")]
     Expired,
 

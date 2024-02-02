@@ -1,4 +1,3 @@
-// Import necessary dependencies.
 use cosmwasm_std::{Addr, Binary, DepsMut, Env, MessageInfo, Response, Uint128};
 use cw_utils::Expiration;
 
@@ -155,6 +154,16 @@ pub fn transfer_from(
     let from_addr = deps.api.addr_validate(&from)?;
     // Validates the receiver's address.
     let to_addr = deps.api.addr_validate(&to)?;
+
+    // If the token is not transferrable or does not exist, returns an error.
+    match TOKENS.may_load(deps.storage, id)? {
+        Some(token_info) => {
+            if !token_info.is_transferrable {
+                return Err(ContractError::NotTransferrable { id });
+            }
+        }
+        None => return Err(ContractError::InvalidToken { id }),
+    }
 
     // Ensures that the message sender can manage the tokens.
     assert_can_manage(deps.storage, &env, from_addr.clone(), info.sender.clone())?;
