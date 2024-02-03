@@ -125,5 +125,15 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractErr
             start_after,
             limit,
         )?)?),
+        QueryMsg::BalancesByOwner {
+            owner,
+            start_after,
+            limit,
+        } => Ok(to_json_binary(&query::query_balances_by_owner(
+            deps,
+            owner,
+            start_after,
+            limit,
+        )?)?),
     }
 }

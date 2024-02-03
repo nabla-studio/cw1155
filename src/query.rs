@@ -5,7 +5,7 @@ use cw_utils::Expiration;
 use crate::{
     helpers::fetch_balance,
     msg::ConfigResponse,
-    state::{approvals, Approval, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
+    state::{approvals, balances, Approval, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
     ContractError,
 };
 
@@ -191,6 +191,42 @@ pub fn query_approvals_by_operator(
         .range(deps.storage, start, None, Order::Ascending)
         .take(limit)
         .flat_map(|vc| Ok::<Approval, ContractError>(vc?.1))
+        .collect();
+
+    // Return the list of approvals.
+    Ok(res)
+}
+
+// Query the list of all token balances by an owner.
+pub fn query_balances_by_owner(
+    deps: Deps,
+    owner: String,
+    start_after: Option<u64>,
+    limit: Option<u32>,
+) -> StdResult<Vec<Balance>> {
+    // Validate the owner's address to ensure it's in a proper format.
+    let owner_addr = deps.api.addr_validate(&owner)?;
+
+    // Set a limit for the number of results.
+    // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
+    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
+
+    // Create a bound for the query based on the owner's address and the start address.
+    let start = start_after.map(|id| Bound::<(Addr, u64)>::exclusive((owner_addr.clone(), id)));
+
+    // Execute the query:
+    // - Use the operator_index to find all approvals for the operator.
+    // - Start the query at the 'start' address if provided.
+    // - Order the results in ascending order.
+    // - Limit the number of results to the specified limit.
+    // - Convert each result into an Approval, handling any potential errors.
+    let res: Vec<Balance> = balances()
+        .idx
+        .owner_index
+        .prefix(owner_addr)
+        .range(deps.storage, start, None, Order::Ascending)
+        .take(limit)
+        .flat_map(|vc| Ok::<Balance, ContractError>(vc?.1))
         .collect();
 
     // Return the list of approvals.

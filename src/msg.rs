@@ -2,7 +2,7 @@ use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Binary, Uint128};
 use cw_utils::Expiration;
 
-use crate::state::{Approval, TokenInfo};
+use crate::state::{Approval, Balance, TokenInfo};
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -144,6 +144,17 @@ pub enum QueryMsg {
         operator: String,
         /// Pagination start key.
         start_after: Option<String>,
+        /// Pagination limit.
+        limit: Option<u32>,
+    },
+
+    /// List of all balances by owner
+    #[returns(Vec<Balance>)]
+    BalancesByOwner {
+        /// Address of the owner.
+        owner: String,
+        /// Pagination start key.
+        start_after: Option<u64>,
         /// Pagination limit.
         limit: Option<u32>,
     },
