@@ -4,7 +4,11 @@ use cosmwasm_std::{Addr, Uint128};
 use cw_multi_test::App;
 use cw_utils::Expiration;
 
-use crate::{msg::ConfigResponse, state::TokenInfo, ContractError};
+use crate::{
+    msg::ConfigResponse,
+    state::{Approval, TokenInfo},
+    ContractError,
+};
 
 use super::contract::Cw1155;
 
@@ -2356,4 +2360,128 @@ fn batch_balances() {
         .to_string()
         .to_lowercase()
         .contains("no token with id 4"));
+}
+
+#[test]
+fn get_approvals_by_owner() {
+    let sender = Addr::unchecked("sender");
+    let davide = Addr::unchecked("davide");
+    let gianni = Addr::unchecked("gianni");
+    let giorgio = Addr::unchecked("giorgio");
+    let giulio = Addr::unchecked("giulio");
+
+    let mut app = App::default();
+
+    let start_time = 12_345;
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .approve_all(
+            &mut app,
+            &davide,
+            gianni.as_str(),
+            Some(Expiration::AtHeight(start_time + 1)),
+        )
+        .unwrap();
+
+    contract
+        .approve_all(
+            &mut app,
+            &davide,
+            giorgio.as_str(),
+            Some(Expiration::AtHeight(start_time + 2)),
+        )
+        .unwrap();
+
+    contract
+        .approve_all(
+            &mut app,
+            &davide,
+            giulio.as_str(),
+            Some(Expiration::AtHeight(start_time + 3)),
+        )
+        .unwrap();
+
+    let davide_approvals = contract
+        .query_approvals_by_owner(&app, davide.clone().into_string(), None, Some(2))
+        .unwrap();
+
+    assert_eq!(
+        davide_approvals,
+        vec![
+            Approval {
+                owner: davide.clone(),
+                operator: gianni.clone(),
+                expiration: Expiration::AtHeight(start_time + 1)
+            },
+            Approval {
+                owner: davide.clone(),
+                operator: giorgio.clone(),
+                expiration: Expiration::AtHeight(start_time + 2)
+            },
+        ]
+    );
+
+    let davide_approvals = contract
+        .query_approvals_by_owner(
+            &app,
+            davide.clone().into_string(),
+            Some(giorgio.clone().into_string()),
+            Some(2),
+        )
+        .unwrap();
+
+    assert_eq!(
+        davide_approvals,
+        vec![Approval {
+            owner: davide.clone(),
+            operator: giulio.clone(),
+            expiration: Expiration::AtHeight(start_time + 3)
+        },]
+    );
+
+    let gianni_approvals = contract
+        .query_approvals_by_owner(&app, gianni.clone().into_string(), None, Some(2))
+        .unwrap();
+
+    assert_eq!(gianni_approvals, vec![]);
+
+    contract
+        .revoke_all(&mut app, &davide, gianni.as_str())
+        .unwrap();
+
+    let davide_approvals = contract
+        .query_approvals_by_owner(&app, davide.clone().into_string(), None, None)
+        .unwrap();
+
+    assert_eq!(
+        davide_approvals,
+        vec![
+            Approval {
+                owner: davide.clone(),
+                operator: giorgio.clone(),
+                expiration: Expiration::AtHeight(start_time + 2)
+            },
+            Approval {
+                owner: davide.clone(),
+                operator: giulio.clone(),
+                expiration: Expiration::AtHeight(start_time + 3)
+            },
+        ]
+    );
 }
