@@ -2728,3 +2728,141 @@ fn get_balances_by_owner() {
         },]
     );
 }
+
+#[test]
+fn get_balances_by_id() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient3 = Addr::unchecked("recipient3");
+    let recipient2 = Addr::unchecked("recipient2");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            1,
+            Uint128::from(11u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient2.as_str(),
+            2,
+            Uint128::from(22u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient3.as_str(),
+            3,
+            Uint128::from(33u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            2,
+            Uint128::from(12u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            3,
+            Uint128::from(13u128),
+            None,
+        )
+        .unwrap();
+
+    let id_1_balances = contract
+        .query_balances_by_id(&app, 1, None, Some(2))
+        .unwrap();
+
+    assert_eq!(
+        id_1_balances,
+        vec![Balance {
+            owner: recipient1.clone(),
+            id: 1,
+            amount: Uint128::from(11u128)
+        },]
+    );
+
+    let id_2_balances = contract
+        .query_balances_by_id(&app, 2, None, Some(2))
+        .unwrap();
+
+    assert_eq!(
+        id_2_balances,
+        vec![
+            Balance {
+                owner: recipient1.clone(),
+                id: 2,
+                amount: Uint128::from(12u128)
+            },
+            Balance {
+                owner: recipient2.clone(),
+                id: 2,
+                amount: Uint128::from(22u128)
+            },
+        ]
+    );
+
+    let id_3_balances = contract
+        .query_balances_by_id(&app, 3, None, Some(2))
+        .unwrap();
+
+    assert_eq!(
+        id_3_balances,
+        vec![
+            Balance {
+                owner: recipient1.clone(),
+                id: 3,
+                amount: Uint128::from(13u128)
+            },
+            Balance {
+                owner: recipient3.clone(),
+                id: 3,
+                amount: Uint128::from(33u128)
+            },
+        ]
+    );
+}

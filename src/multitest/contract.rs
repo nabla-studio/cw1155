@@ -363,6 +363,24 @@ impl Cw1155 {
             },
         )
     }
+
+    #[track_caller]
+    pub fn query_balances_by_id(
+        &self,
+        app: &App,
+        id: u64,
+        start_after: Option<String>,
+        limit: Option<u32>,
+    ) -> StdResult<Vec<Balance>> {
+        app.wrap().query_wasm_smart(
+            self.0.clone(),
+            &QueryMsg::BalancesById {
+                id,
+                start_after,
+                limit,
+            },
+        )
+    }
 }
 
 impl From<Cw1155> for Addr {
