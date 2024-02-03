@@ -294,6 +294,22 @@ Response:
 array["Approval"]
 ```
 
+#### ApprovalsByOperator
+
+Get the list of owners authorizing given operator to manage all their tokens.
+
+```
+ApprovalsByOperator {
+    "operator*": "string",
+    "start_after": Option<"string">,
+    "limit": Option<"u32">,
+}
+``` 
+Response:
+```
+array["Approval"]
+```
+
 #### Config
 
 Access basic contract information including the metadata URI, the current 
