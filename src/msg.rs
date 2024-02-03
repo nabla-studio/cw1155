@@ -2,7 +2,7 @@ use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Binary, Uint128};
 use cw_utils::Expiration;
 
-use crate::state::TokenInfo;
+use crate::state::{Approval, TokenInfo};
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -125,6 +125,17 @@ pub enum QueryMsg {
     /// the tokens owned by an owner.
     #[returns(Option<Expiration>)]
     IsApprovedForAll { owner: String, operator: String },
+
+    /// List of all approvals by owner
+    #[returns(Vec<Approval>)]
+    ApprovalsByOwner {
+        /// Address of the owner.
+        owner: String,
+        /// Pagination start key.
+        start_after: Option<String>,
+        /// Pagination limit.
+        limit: Option<u32>,
+    },
 
     /// Config returns the current information about the contract and the
     /// related tokens collection.

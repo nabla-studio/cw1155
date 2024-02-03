@@ -105,6 +105,7 @@ impl<'a> IndexList<Approval> for ApprovalsIndexes<'a> {
     }
 }
 
+// Order: (owner, operator)
 pub fn approvals<'a>() -> IndexedMap<'a, (Addr, Addr), Approval, ApprovalsIndexes<'a>> {
     let indexes = ApprovalsIndexes {
         owner_index: MultiIndex::new(

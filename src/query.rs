@@ -1,12 +1,16 @@
-use cosmwasm_std::{Deps, StdResult, Uint128};
+use cosmwasm_std::{Addr, Deps, Order, StdResult, Uint128};
+use cw_storage_plus::Bound;
 use cw_utils::Expiration;
 
 use crate::{
     helpers::fetch_balance,
     msg::ConfigResponse,
-    state::{approvals, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
+    state::{approvals, Approval, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
     ContractError,
 };
+
+pub const DEFAULT_LIMIT: u32 = 10;
+pub const MAX_LIMIT: u32 = 50;
 
 // Query contract configuration.
 pub fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
@@ -94,4 +98,52 @@ pub fn query_approved_for_all(
 
     // Return the approval status.
     Ok(expiration)
+}
+
+// Query te list of operators approved to manage all of an owner's tokens.
+pub fn query_approvals_by_owner(
+    deps: Deps,
+    owner: String,
+    start_after: Option<String>,
+    limit: Option<u32>,
+) -> StdResult<Vec<Approval>> {
+    // Validate the owner's address to ensure it's in a proper format.
+    let owner_addr = deps.api.addr_validate(&owner)?;
+
+    // Determine the start address for the query. This is used for pagination.
+    let start_addr = match start_after {
+        Some(addr) => {
+            // If a start_after address is provided, validate it.
+            let validated_addr = deps.api.addr_validate(&addr)?;
+            // Use the validated address as the starting point.
+            Some(validated_addr)
+        }
+        // If no start_after address is provided, the query will start from the beginning.
+        None => None,
+    };
+
+    // Set a limit for the number of results.
+    // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
+    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
+
+    // Create a bound for the query based on the owner's address and the start address.
+    let start = start_addr.map(|addr| Bound::<(Addr, Addr)>::exclusive((owner_addr.clone(), addr)));
+
+    // Execute the query:
+    // - Use the owner_index to find all approvals for the owner.
+    // - Start the query at the 'start' address if provided.
+    // - Order the results in ascending order.
+    // - Limit the number of results to the specified limit.
+    // - Convert each result into an Approval, handling any potential errors.
+    let res: Vec<Approval> = approvals()
+        .idx
+        .owner_index
+        .prefix(owner_addr)
+        .range(deps.storage, start, None, Order::Ascending)
+        .take(limit)
+        .flat_map(|vc| Ok::<Approval, ContractError>(vc?.1))
+        .collect();
+
+    // Return the list of approvals.
+    Ok(res)
 }
