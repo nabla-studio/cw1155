@@ -135,5 +135,15 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractErr
             start_after,
             limit,
         )?)?),
+        QueryMsg::BalancesById {
+            id,
+            start_after,
+            limit,
+        } => Ok(to_json_binary(&query::query_balances_by_id(
+            deps,
+            id,
+            start_after,
+            limit,
+        )?)?),
     }
 }

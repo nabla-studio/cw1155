@@ -211,8 +211,53 @@ pub fn query_balances_by_owner(
     // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
     let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
 
-    // Create a bound for the query based on the owner's address and the start address.
+    // Create a bound for the query based on the owner's address and the start id.
     let start = start_after.map(|id| Bound::<(Addr, u64)>::exclusive((owner_addr.clone(), id)));
+
+    // Execute the query:
+    // - Use the owner_index to find all balances for the owner.
+    // - Start the query at the 'start' id if provided.
+    // - Order the results in ascending order.
+    // - Limit the number of results to the specified limit.
+    // - Convert each result into a Balance, handling any potential errors.
+    let res: Vec<Balance> = balances()
+        .idx
+        .owner_index
+        .prefix(owner_addr)
+        .range(deps.storage, start, None, Order::Ascending)
+        .take(limit)
+        .flat_map(|vc| Ok::<Balance, ContractError>(vc?.1))
+        .collect();
+
+    // Return the list of approvals.
+    Ok(res)
+}
+
+// Query the list of owners who approved the operator to manage all of their tokens.
+pub fn query_balances_by_id(
+    deps: Deps,
+    id: u64,
+    start_after: Option<String>,
+    limit: Option<u32>,
+) -> StdResult<Vec<Balance>> {
+    // Determine the start address for the query. This is used for pagination.
+    let start_addr = match start_after {
+        Some(addr) => {
+            // If a start_after address is provided, validate it.
+            let validated_addr = deps.api.addr_validate(&addr)?;
+            // Use the validated address as the starting point.
+            Some(validated_addr)
+        }
+        // If no start_after address is provided, the query will start from the beginning.
+        None => None,
+    };
+
+    // Set a limit for the number of results.
+    // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
+    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
+
+    // Create a bound for the query based on the owner's address and the start address.
+    let start = start_addr.map(|addr| Bound::<(Addr, u64)>::exclusive((addr, id)));
 
     // Execute the query:
     // - Use the operator_index to find all approvals for the operator.
@@ -222,8 +267,8 @@ pub fn query_balances_by_owner(
     // - Convert each result into an Approval, handling any potential errors.
     let res: Vec<Balance> = balances()
         .idx
-        .owner_index
-        .prefix(owner_addr)
+        .token_index
+        .prefix(id)
         .range(deps.storage, start, None, Order::Ascending)
         .take(limit)
         .flat_map(|vc| Ok::<Balance, ContractError>(vc?.1))

@@ -159,6 +159,17 @@ pub enum QueryMsg {
         limit: Option<u32>,
     },
 
+    /// List of all balances by token id
+    #[returns(Vec<Balance>)]
+    BalancesById {
+        /// Id of the token.
+        id: u64,
+        /// Pagination start key.
+        start_after: Option<String>,
+        /// Pagination limit.
+        limit: Option<u32>,
+    },
+
     /// Config returns the current information about the contract and the
     /// related tokens collection.
     #[returns(ConfigResponse)]
