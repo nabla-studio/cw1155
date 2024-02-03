@@ -4,7 +4,7 @@ use cw_utils::Expiration;
 
 use crate::contract::{execute, instantiate, query};
 use crate::msg::{ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{Approval, TokenInfo};
+use crate::state::{Approval, Balance, TokenInfo};
 use crate::ContractError;
 
 pub struct Cw1155(Addr);
@@ -340,6 +340,24 @@ impl Cw1155 {
             self.0.clone(),
             &QueryMsg::ApprovalsByOperator {
                 operator,
+                start_after,
+                limit,
+            },
+        )
+    }
+
+    #[track_caller]
+    pub fn query_balances_by_owner(
+        &self,
+        app: &App,
+        owner: String,
+        start_after: Option<u64>,
+        limit: Option<u32>,
+    ) -> StdResult<Vec<Balance>> {
+        app.wrap().query_wasm_smart(
+            self.0.clone(),
+            &QueryMsg::BalancesByOwner {
+                owner,
                 start_after,
                 limit,
             },

@@ -6,7 +6,7 @@ use cw_utils::Expiration;
 
 use crate::{
     msg::ConfigResponse,
-    state::{Approval, TokenInfo},
+    state::{Approval, Balance, TokenInfo},
     ContractError,
 };
 
@@ -2595,5 +2595,136 @@ fn get_approvals_by_operator() {
                 expiration: Expiration::Never {}
             },
         ]
+    );
+}
+
+#[test]
+fn get_balances_by_owner() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient3 = Addr::unchecked("recipient3");
+    let recipient2 = Addr::unchecked("recipient2");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            1,
+            Uint128::from(11u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient2.as_str(),
+            2,
+            Uint128::from(22u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient3.as_str(),
+            3,
+            Uint128::from(33u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            2,
+            Uint128::from(12u128),
+            None,
+        )
+        .unwrap();
+
+    contract
+        .mint(
+            &mut app,
+            &sender,
+            recipient1.as_str(),
+            3,
+            Uint128::from(13u128),
+            None,
+        )
+        .unwrap();
+
+    let recipient1_balances = contract
+        .query_balances_by_owner(&app, recipient1.clone().into_string(), None, Some(2))
+        .unwrap();
+
+    assert_eq!(
+        recipient1_balances,
+        vec![
+            Balance {
+                owner: recipient1.clone(),
+                id: 1,
+                amount: Uint128::from(11u128)
+            },
+            Balance {
+                owner: recipient1.clone(),
+                id: 2,
+                amount: Uint128::from(12u128)
+            }
+        ]
+    );
+
+    let recipient1_approvals = contract
+        .query_balances_by_owner(&app, recipient1.clone().into_string(), Some(2), Some(2))
+        .unwrap();
+
+    assert_eq!(
+        recipient1_approvals,
+        vec![Balance {
+            owner: recipient1.clone(),
+            id: 3,
+            amount: Uint128::from(13u128)
+        },]
+    );
+
+    let recipient2_approvals = contract
+        .query_balances_by_owner(&app, recipient2.clone().into_string(), None, None)
+        .unwrap();
+
+    assert_eq!(
+        recipient2_approvals,
+        vec![Balance {
+            owner: recipient2.clone(),
+            id: 2,
+            amount: Uint128::from(22u128)
+        },]
     );
 }
