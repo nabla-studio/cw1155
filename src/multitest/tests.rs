@@ -2365,10 +2365,10 @@ fn batch_balances() {
 #[test]
 fn get_approvals_by_owner() {
     let sender = Addr::unchecked("sender");
-    let davide = Addr::unchecked("davide");
-    let gianni = Addr::unchecked("gianni");
-    let giorgio = Addr::unchecked("giorgio");
-    let giulio = Addr::unchecked("giulio");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient3 = Addr::unchecked("recipient3");
+    let recipient2 = Addr::unchecked("recipient2");
+    let recipient4 = Addr::unchecked("recipient4");
 
     let mut app = App::default();
 
@@ -2393,8 +2393,8 @@ fn get_approvals_by_owner() {
     contract
         .approve_all(
             &mut app,
-            &davide,
-            gianni.as_str(),
+            &recipient1,
+            recipient4.as_str(),
             Some(Expiration::AtHeight(start_time + 1)),
         )
         .unwrap();
@@ -2402,8 +2402,8 @@ fn get_approvals_by_owner() {
     contract
         .approve_all(
             &mut app,
-            &davide,
-            giorgio.as_str(),
+            &recipient1,
+            recipient3.as_str(),
             Some(Expiration::AtHeight(start_time + 2)),
         )
         .unwrap();
@@ -2411,76 +2411,188 @@ fn get_approvals_by_owner() {
     contract
         .approve_all(
             &mut app,
-            &davide,
-            giulio.as_str(),
+            &recipient1,
+            recipient2.as_str(),
             Some(Expiration::AtHeight(start_time + 3)),
         )
         .unwrap();
 
-    let davide_approvals = contract
-        .query_approvals_by_owner(&app, davide.clone().into_string(), None, Some(2))
+    let recipient1_approvals = contract
+        .query_approvals_by_owner(&app, recipient1.clone().into_string(), None, Some(2))
         .unwrap();
 
     assert_eq!(
-        davide_approvals,
+        recipient1_approvals,
         vec![
             Approval {
-                owner: davide.clone(),
-                operator: gianni.clone(),
-                expiration: Expiration::AtHeight(start_time + 1)
+                owner: recipient1.clone(),
+                operator: recipient2.clone(),
+                expiration: Expiration::AtHeight(start_time + 3)
             },
             Approval {
-                owner: davide.clone(),
-                operator: giorgio.clone(),
+                owner: recipient1.clone(),
+                operator: recipient3.clone(),
                 expiration: Expiration::AtHeight(start_time + 2)
             },
         ]
     );
 
-    let davide_approvals = contract
+    let recipient1_approvals = contract
         .query_approvals_by_owner(
             &app,
-            davide.clone().into_string(),
-            Some(giorgio.clone().into_string()),
+            recipient1.clone().into_string(),
+            Some(recipient3.clone().into_string()),
             Some(2),
         )
         .unwrap();
 
     assert_eq!(
-        davide_approvals,
+        recipient1_approvals,
         vec![Approval {
-            owner: davide.clone(),
-            operator: giulio.clone(),
-            expiration: Expiration::AtHeight(start_time + 3)
+            owner: recipient1.clone(),
+            operator: recipient4.clone(),
+            expiration: Expiration::AtHeight(start_time + 1)
         },]
     );
 
-    let gianni_approvals = contract
-        .query_approvals_by_owner(&app, gianni.clone().into_string(), None, Some(2))
+    let recipient3_approvals = contract
+        .query_approvals_by_owner(&app, recipient3.clone().into_string(), None, Some(2))
         .unwrap();
 
-    assert_eq!(gianni_approvals, vec![]);
+    assert_eq!(recipient3_approvals, vec![]);
 
     contract
-        .revoke_all(&mut app, &davide, gianni.as_str())
+        .revoke_all(&mut app, &recipient1, recipient3.as_str())
         .unwrap();
 
-    let davide_approvals = contract
-        .query_approvals_by_owner(&app, davide.clone().into_string(), None, None)
+    let recipient1_approvals = contract
+        .query_approvals_by_owner(&app, recipient1.clone().into_string(), None, None)
         .unwrap();
 
     assert_eq!(
-        davide_approvals,
+        recipient1_approvals,
         vec![
             Approval {
-                owner: davide.clone(),
-                operator: giorgio.clone(),
-                expiration: Expiration::AtHeight(start_time + 2)
+                owner: recipient1.clone(),
+                operator: recipient2.clone(),
+                expiration: Expiration::AtHeight(start_time + 3)
             },
             Approval {
-                owner: davide.clone(),
-                operator: giulio.clone(),
-                expiration: Expiration::AtHeight(start_time + 3)
+                owner: recipient1.clone(),
+                operator: recipient4.clone(),
+                expiration: Expiration::AtHeight(start_time + 1)
+            },
+        ]
+    );
+}
+
+#[test]
+fn get_approvals_by_operator() {
+    let sender = Addr::unchecked("sender");
+    let recipient1 = Addr::unchecked("recipient1");
+    let recipient3 = Addr::unchecked("recipient3");
+    let recipient2 = Addr::unchecked("recipient2");
+    let recipient4 = Addr::unchecked("recipient4");
+    let recipient5 = Addr::unchecked("recipient5");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        &METADATA_URI,
+        None,
+        None,
+        &NAME,
+        &DESCRIPTION,
+    )
+    .unwrap();
+
+    contract
+        .approve_all(&mut app, &recipient1, recipient3.as_str(), None)
+        .unwrap();
+
+    contract
+        .approve_all(&mut app, &recipient1, recipient5.as_str(), None)
+        .unwrap();
+
+    contract
+        .approve_all(&mut app, &recipient2, recipient3.as_str(), None)
+        .unwrap();
+
+    contract
+        .approve_all(&mut app, &recipient4, recipient3.as_str(), None)
+        .unwrap();
+
+    let recipient3_approvals = contract
+        .query_approvals_by_operator(&app, recipient3.clone().into_string(), None, Some(2))
+        .unwrap();
+
+    assert_eq!(
+        recipient3_approvals,
+        vec![
+            Approval {
+                owner: recipient1.clone(),
+                operator: recipient3.clone(),
+                expiration: Expiration::Never {}
+            },
+            Approval {
+                owner: recipient2.clone(),
+                operator: recipient3.clone(),
+                expiration: Expiration::Never {}
+            },
+        ]
+    );
+
+    let recipient3_approvals = contract
+        .query_approvals_by_operator(
+            &app,
+            recipient3.clone().into_string(),
+            Some(recipient2.clone().into_string()),
+            Some(2),
+        )
+        .unwrap();
+
+    assert_eq!(
+        recipient3_approvals,
+        vec![Approval {
+            owner: recipient4.clone(),
+            operator: recipient3.clone(),
+            expiration: Expiration::Never {}
+        },]
+    );
+
+    let recipient1_approvals = contract
+        .query_approvals_by_operator(&app, recipient1.clone().into_string(), None, Some(2))
+        .unwrap();
+
+    assert_eq!(recipient1_approvals, vec![]);
+
+    contract
+        .revoke_all(&mut app, &recipient2, recipient3.as_str())
+        .unwrap();
+
+    let recipient3_approvals = contract
+        .query_approvals_by_operator(&app, recipient3.clone().into_string(), None, None)
+        .unwrap();
+
+    assert_eq!(
+        recipient3_approvals,
+        vec![
+            Approval {
+                owner: recipient1.clone(),
+                operator: recipient3.clone(),
+                expiration: Expiration::Never {}
+            },
+            Approval {
+                owner: recipient4.clone(),
+                operator: recipient3.clone(),
+                expiration: Expiration::Never {}
             },
         ]
     );

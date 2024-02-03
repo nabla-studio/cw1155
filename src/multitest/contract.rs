@@ -327,6 +327,24 @@ impl Cw1155 {
             },
         )
     }
+
+    #[track_caller]
+    pub fn query_approvals_by_operator(
+        &self,
+        app: &App,
+        operator: String,
+        start_after: Option<String>,
+        limit: Option<u32>,
+    ) -> StdResult<Vec<Approval>> {
+        app.wrap().query_wasm_smart(
+            self.0.clone(),
+            &QueryMsg::ApprovalsByOperator {
+                operator,
+                start_after,
+                limit,
+            },
+        )
+    }
 }
 
 impl From<Cw1155> for Addr {
