@@ -137,6 +137,17 @@ pub enum QueryMsg {
         limit: Option<u32>,
     },
 
+    /// List of all approvals by operator
+    #[returns(Vec<Approval>)]
+    ApprovalsByOperator {
+        /// Address of the operator.
+        operator: String,
+        /// Pagination start key.
+        start_after: Option<String>,
+        /// Pagination limit.
+        limit: Option<u32>,
+    },
+
     /// Config returns the current information about the contract and the
     /// related tokens collection.
     #[returns(ConfigResponse)]

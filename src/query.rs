@@ -100,7 +100,7 @@ pub fn query_approved_for_all(
     Ok(expiration)
 }
 
-// Query te list of operators approved to manage all of an owner's tokens.
+// Query the list of operators approved to manage all of an owner's tokens.
 pub fn query_approvals_by_owner(
     deps: Deps,
     owner: String,
@@ -139,6 +139,55 @@ pub fn query_approvals_by_owner(
         .idx
         .owner_index
         .prefix(owner_addr)
+        .range(deps.storage, start, None, Order::Ascending)
+        .take(limit)
+        .flat_map(|vc| Ok::<Approval, ContractError>(vc?.1))
+        .collect();
+
+    // Return the list of approvals.
+    Ok(res)
+}
+
+// Query the list of owners who approved the operator to manage all of their tokens.
+pub fn query_approvals_by_operator(
+    deps: Deps,
+    operator: String,
+    start_after: Option<String>,
+    limit: Option<u32>,
+) -> StdResult<Vec<Approval>> {
+    // Validate the operator's address to ensure it's in a proper format.
+    let operator_addr = deps.api.addr_validate(&operator)?;
+
+    // Determine the start address for the query. This is used for pagination.
+    let start_addr = match start_after {
+        Some(addr) => {
+            // If a start_after address is provided, validate it.
+            let validated_addr = deps.api.addr_validate(&addr)?;
+            // Use the validated address as the starting point.
+            Some(validated_addr)
+        }
+        // If no start_after address is provided, the query will start from the beginning.
+        None => None,
+    };
+
+    // Set a limit for the number of results.
+    // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
+    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
+
+    // Create a bound for the query based on the owner's address and the start address.
+    let start =
+        start_addr.map(|addr| Bound::<(Addr, Addr)>::exclusive((addr, operator_addr.clone())));
+
+    // Execute the query:
+    // - Use the operator_index to find all approvals for the operator.
+    // - Start the query at the 'start' address if provided.
+    // - Order the results in ascending order.
+    // - Limit the number of results to the specified limit.
+    // - Convert each result into an Approval, handling any potential errors.
+    let res: Vec<Approval> = approvals()
+        .idx
+        .operator_index
+        .prefix(operator_addr)
         .range(deps.storage, start, None, Order::Ascending)
         .take(limit)
         .flat_map(|vc| Ok::<Approval, ContractError>(vc?.1))
