@@ -245,9 +245,7 @@ Balance {
 ``` 
 Response:
 ```
-BalanceResponse {
-    "amount": "integer"
-}
+"integer"
 ```
 
 #### BatchBalance
@@ -262,9 +260,7 @@ BatchBalance {
 ```
 Response:
 ```
-BatchBalanceResponse {
-    "balances": "array[BalanceResponse]"
-}
+array["integer"]
 ```
 
 #### IsApprovedForAll
@@ -279,9 +275,23 @@ IsApprovedForAll {
 ``` 
 Response:
 ```
-IsApprovedForAllResponse {
-    "approved": Option<"expiration">
+Option<"expiration">
+```
+
+#### ApprovalsByOwner
+
+Get the list of operators authorized to manage all tokens of a given owner.
+
+```
+ApprovalsByOwner {
+    "owner*": "string",
+    "start_after": Option<"string">,
+    "limit": Option<"u32">,
 }
+``` 
+Response:
+```
+array["Approval"]
 ```
 
 #### Config
