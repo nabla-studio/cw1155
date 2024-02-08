@@ -45,8 +45,7 @@ pub fn query_balance(deps: Deps, owner: String, id: u64) -> Result<Uint128, Cont
     let owner_addr = deps.api.addr_validate(&owner)?;
 
     // Return invalid token if the token is not registered.
-    let max_token_id = REGISTERED_TOKENS.load(deps.storage)?;
-    if id > max_token_id {
+    if !TOKENS.has(deps.storage, id) {
         return Err(ContractError::InvalidToken { id });
     }
 
