@@ -17,7 +17,7 @@ pub fn register(
     deps: DepsMut,
     info: MessageInfo,
     max_supply: Option<Uint128>,
-    is_transferrable: Option<bool>,
+    is_transferable: Option<bool>,
 ) -> Result<Response, ContractError> {
     // Ensures that the message sender is the owner of the contract.
     assert_owner(deps.storage, &info.sender)?;
@@ -34,7 +34,7 @@ pub fn register(
 
     // Creates a new token with the provided details.
     let token = TokenInfo {
-        is_transferrable: is_transferrable.unwrap_or(true),
+        is_transferable: is_transferable.unwrap_or(true),
         max_supply,
         burned: Uint128::zero(),
         current_supply: Uint128::zero(),

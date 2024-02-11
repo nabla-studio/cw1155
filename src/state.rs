@@ -28,7 +28,7 @@ pub const REGISTERED_TOKENS: Item<u64> = Item::new("registered_tokens");
 pub struct TokenInfo {
     /// Boolean flag indicating whether token is transferable after minting or
     /// not.
-    pub is_transferrable: bool,
+    pub is_transferable: bool,
     /// Maximum number of elements of tokens that can be minted.
     pub max_supply: Option<Uint128>,
     /// Number of elements of tokens that have been burned.

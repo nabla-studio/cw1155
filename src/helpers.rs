@@ -118,7 +118,7 @@ pub fn increase_registered_tokens(store: &mut dyn Storage) -> Result<u64, Contra
 }
 
 /// Increase the current supply of a token remaining in the safe range of
-/// Uin128 and below the maximum supply (if provided).
+/// Uint128 and below the maximum supply (if provided).
 pub fn increase_current_supply(
     store: &mut dyn Storage,
     id: u64,
