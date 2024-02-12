@@ -80,7 +80,7 @@ pub fn update_balance(
             let mut new_balance: Balance = balance.unwrap_or_else(|| Balance {
                 owner: addr.clone(),
                 amount: Uint128::new(0),
-                id: id,
+                id,
             });
 
             new_balance.amount = match action {
@@ -93,7 +93,7 @@ pub fn update_balance(
                     // error.
                     new_balance.amount.checked_sub(amount).map_err(|_| {
                         ContractError::InsufficientFunds {
-                            id: id,
+                            id,
                             required: amount,
                             available: new_balance.amount,
                         }
@@ -181,7 +181,7 @@ pub fn decrease_current_supply(
                     .current_supply
                     .checked_sub(*amount)
                     .map_err(|_| ContractError::InsufficientFunds {
-                        id: id,
+                        id,
                         required: *amount,
                         available: token_info.current_supply,
                     })?;

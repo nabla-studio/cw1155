@@ -158,8 +158,8 @@ pub fn transfer_from(
     // If the token is not transferrable or does not exist, returns an error.
     match TOKENS.may_load(deps.storage, id)? {
         Some(token_info) => {
-            if !token_info.is_transferrable {
-                return Err(ContractError::NotTransferrable { id });
+            if !token_info.is_transferable {
+                return Err(ContractError::NotTransferable { id });
             }
         }
         None => return Err(ContractError::InvalidToken { id }),
@@ -171,7 +171,7 @@ pub fn transfer_from(
     // Executes the transfer of the minted tokens to the specified address.
     exec_transfer(deps, Some(from_addr), Some(to_addr), id, amount)?;
 
-    // Initialize a response with basic tranferring attributes.
+    // Initialize a response with basic transfer attributes.
     let mut resp = Response::default()
         .add_attribute("action", "transfer_from")
         .add_attribute("from", &from)
