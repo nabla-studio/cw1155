@@ -61,8 +61,8 @@ pub fn execute(
     match msg {
         ExecuteMsg::Register {
             max_supply,
-            is_transferrable,
-        } => execute::register(deps, info, max_supply, is_transferrable),
+            is_transferable,
+        } => execute::register(deps, info, max_supply, is_transferable),
         ExecuteMsg::Mint {
             to,
             id,

@@ -8,10 +8,10 @@ use cw_utils::Expiration;
 pub struct Config {
     /// Base URI for metadata. It is immutable after the creation.
     pub metadata_uri: String,
-    /// When the minter value is changed to Empty, no token can be minted
+    /// When the minter value is changed to None, no token can be minted
     /// anymore.
     pub minter: Option<Addr>,
-    /// When the owner value is changed to Empty, no token can be registerd
+    /// When the owner value is changed to None, no token can be registered
     /// anymore.
     pub owner: Option<Addr>,
     /// A human-readable title for the collection.
@@ -26,9 +26,9 @@ pub const REGISTERED_TOKENS: Item<u64> = Item::new("registered_tokens");
 
 #[cw_serde]
 pub struct TokenInfo {
-    /// Boolean flag indicating whether token is transferrable after minting or
+    /// Boolean flag indicating whether token is transferable after minting or
     /// not.
-    pub is_transferrable: bool,
+    pub is_transferable: bool,
     /// Maximum number of elements of tokens that can be minted.
     pub max_supply: Option<Uint128>,
     /// Number of elements of tokens that have been burned.

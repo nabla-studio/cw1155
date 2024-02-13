@@ -60,17 +60,17 @@ impl Cw1155 {
         app: &mut App,
         sender: &Addr,
         max_supply: impl Into<Option<Uint128>>,
-        is_transferrable: impl Into<Option<bool>>,
+        is_transferable: impl Into<Option<bool>>,
     ) -> Result<(), ContractError> {
         let max_supply = max_supply.into();
-        let is_transferrable = is_transferrable.into();
+        let is_transferable = is_transferable.into();
 
         app.execute_contract(
             sender.clone(),
             self.0.clone(),
             &ExecuteMsg::Register {
                 max_supply,
-                is_transferrable,
+                is_transferable,
             },
             &[],
         )

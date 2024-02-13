@@ -32,8 +32,8 @@ pub enum ExecuteMsg {
     Register {
         /// Maximum number of elements of tokens that can be minted.
         max_supply: Option<Uint128>,
-        /// Flag indicating whether token is transferrable after minting or not.
-        is_transferrable: Option<bool>,
+        /// Flag indicating whether token is transferable after minting or not.
+        is_transferable: Option<bool>,
     },
 
     /// Mint an already registered token.
