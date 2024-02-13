@@ -35,7 +35,7 @@ pub fn query_token_info(deps: Deps, id: u64) -> Result<TokenInfo, ContractError>
     // Load token information by token ID from the storage.
     match TOKENS.may_load(deps.storage, id)? {
         Some(token_info) => Ok(token_info),
-        None => return Err(ContractError::InvalidToken { id }),
+        None => Err(ContractError::InvalidToken { id }),
     }
 }
 
