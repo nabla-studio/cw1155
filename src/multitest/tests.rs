@@ -1389,7 +1389,7 @@ fn unallowed_transfer_from() {
         )
         .unwrap_err();
 
-    assert_eq!(err, ContractError::NotTransferrable { id: 1 });
+    assert_eq!(err, ContractError::NotTransferable { id: 1 });
 
     let recipient1_balance = contract
         .query_balance(&app, recipient1.clone().into_string(), 1)
