@@ -123,7 +123,7 @@ fn get_no_registered_tokens() {
 }
 
 #[test]
-fn register_max_supply_and_is_transferrable_token() {
+fn register_max_supply_and_is_transferable_token() {
     let sender = Addr::unchecked("sender");
 
     let mut app = App::default();

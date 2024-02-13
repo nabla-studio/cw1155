@@ -67,13 +67,13 @@ Register a new token type with specific attributes without immediate minting.
 ```
 Register { 
     "max_supply": "integer",
-    "is_transferrable": "boolean"
+    "is_transferable": "boolean"
 }
 ```
 Parameters:
 - `max_supply`: Cap on token quantity. If unspecified, the supply is deemed 
 unlimited. Max supply cannot be increased after registration.
-- `is_transferrable`: Flag indicating if the token can be transferred 
+- `is_transferable`: Flag indicating if the token can be transferred 
 post-minting, defaulting to true.
 
 *Attempts to register tokens by addresses not authorized as owners will result
