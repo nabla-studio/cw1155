@@ -32,11 +32,11 @@ fn get_config() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         Some(&minter),
         Some(&owner),
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -69,11 +69,11 @@ fn get_config_empty_owner_and_minter() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -106,11 +106,11 @@ fn get_no_registered_tokens() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -136,11 +136,11 @@ fn register_max_supply_and_is_transferable_token() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -170,11 +170,11 @@ fn register_max_supply_and_is_not_transferrable_token() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -204,11 +204,11 @@ fn register_max_supply_zero_token() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -240,11 +240,11 @@ fn get_one_registered_token() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -273,11 +273,11 @@ fn unauthorized_register() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         Some(&owner),
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -310,11 +310,11 @@ fn mint() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -359,11 +359,11 @@ fn unauthorized_mint() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -410,11 +410,11 @@ fn try_overcome_max_supply() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -457,11 +457,11 @@ fn multiple_mint() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -530,11 +530,11 @@ fn mint_multiple_recipients() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -604,11 +604,11 @@ fn alice_approve_bob() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -655,11 +655,11 @@ fn expired_approve() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -699,11 +699,11 @@ fn alice_multiple_approve() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -759,11 +759,11 @@ fn alice_revoke() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -839,11 +839,11 @@ fn burn() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -912,11 +912,11 @@ fn unauthorized_burn() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -986,11 +986,11 @@ fn insufficient_burn() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1028,11 +1028,11 @@ fn approved_burn() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1110,11 +1110,11 @@ fn too_much_to_burn() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1204,11 +1204,11 @@ fn transfer_from() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1282,11 +1282,11 @@ fn unauthorized_transfer_from() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1348,11 +1348,11 @@ fn unallowed_transfer_from() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1414,11 +1414,11 @@ fn authorized_transfer_from() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1493,11 +1493,11 @@ fn too_much_to_transfer_from() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1560,11 +1560,11 @@ fn transfer_zero() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1631,11 +1631,11 @@ fn auto_transfer() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1695,11 +1695,11 @@ fn set_minter_mint() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1782,11 +1782,11 @@ fn unauthorized_set_minter() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1821,11 +1821,11 @@ fn set_minter_none() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         Some(&minter),
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1856,11 +1856,11 @@ fn set_owner_register() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1895,11 +1895,11 @@ fn unauthorized_set_owner() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         Some(&owner),
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1924,11 +1924,11 @@ fn set_owner_none() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -1950,11 +1950,11 @@ fn mint_disable_minting() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -2017,11 +2017,11 @@ fn mint_burn_disable_minting() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -2094,11 +2094,11 @@ fn mint_disable_minting_burn() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -2171,11 +2171,11 @@ fn update_collection() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         Some(&owner),
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -2218,11 +2218,11 @@ fn unauthorized_update_collection() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         Some(&owner),
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -2261,11 +2261,11 @@ fn batch_balances() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -2382,11 +2382,11 @@ fn get_approvals_by_owner() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -2505,11 +2505,11 @@ fn get_approvals_by_operator() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -2615,11 +2615,11 @@ fn get_balances_by_owner() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 
@@ -2746,11 +2746,11 @@ fn get_balances_by_id() {
         &sender,
         "CW1155 nabla collection",
         None,
-        &METADATA_URI,
+        METADATA_URI,
         None,
         None,
-        &NAME,
-        &DESCRIPTION,
+        NAME,
+        DESCRIPTION,
     )
     .unwrap();
 

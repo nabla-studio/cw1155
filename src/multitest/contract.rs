@@ -209,7 +209,7 @@ impl Cw1155 {
         app.execute_contract(
             sender.clone(),
             self.0.clone(),
-            &ExecuteMsg::SetMinter { minter: minter },
+            &ExecuteMsg::SetMinter { minter },
             &[],
         )
         .map_err(|err| err.downcast().unwrap())
