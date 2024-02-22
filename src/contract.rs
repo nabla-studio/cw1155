@@ -105,45 +105,5 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractErr
         )?),
         QueryMsg::Config {} => Ok(to_json_binary(&query::query_config(deps)?)?),
         QueryMsg::TokenInfo { id } => Ok(to_json_binary(&query::query_token_info(deps, id)?)?),
-        QueryMsg::ApprovalsByOwner {
-            owner,
-            start_after,
-            limit,
-        } => Ok(to_json_binary(&query::query_approvals_by_owner(
-            deps,
-            owner,
-            start_after,
-            limit,
-        )?)?),
-        QueryMsg::ApprovalsByOperator {
-            operator,
-            start_after,
-            limit,
-        } => Ok(to_json_binary(&query::query_approvals_by_operator(
-            deps,
-            operator,
-            start_after,
-            limit,
-        )?)?),
-        QueryMsg::BalancesByOwner {
-            owner,
-            start_after,
-            limit,
-        } => Ok(to_json_binary(&query::query_balances_by_owner(
-            deps,
-            owner,
-            start_after,
-            limit,
-        )?)?),
-        QueryMsg::BalancesById {
-            id,
-            start_after,
-            limit,
-        } => Ok(to_json_binary(&query::query_balances_by_id(
-            deps,
-            id,
-            start_after,
-            limit,
-        )?)?),
     }
 }

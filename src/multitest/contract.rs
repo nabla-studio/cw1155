@@ -4,7 +4,7 @@ use cw_utils::Expiration;
 
 use crate::contract::{execute, instantiate, query};
 use crate::msg::{ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{Approval, Balance, TokenInfo};
+use crate::state::TokenInfo;
 use crate::ContractError;
 
 pub struct Cw1155(Addr);
@@ -307,78 +307,6 @@ impl Cw1155 {
         app.wrap().query_wasm_smart(
             self.0.clone(),
             &QueryMsg::IsApprovedForAll { owner, operator },
-        )
-    }
-
-    #[track_caller]
-    pub fn query_approvals_by_owner(
-        &self,
-        app: &App,
-        owner: String,
-        start_after: Option<String>,
-        limit: Option<u32>,
-    ) -> StdResult<Vec<Approval>> {
-        app.wrap().query_wasm_smart(
-            self.0.clone(),
-            &QueryMsg::ApprovalsByOwner {
-                owner,
-                start_after,
-                limit,
-            },
-        )
-    }
-
-    #[track_caller]
-    pub fn query_approvals_by_operator(
-        &self,
-        app: &App,
-        operator: String,
-        start_after: Option<String>,
-        limit: Option<u32>,
-    ) -> StdResult<Vec<Approval>> {
-        app.wrap().query_wasm_smart(
-            self.0.clone(),
-            &QueryMsg::ApprovalsByOperator {
-                operator,
-                start_after,
-                limit,
-            },
-        )
-    }
-
-    #[track_caller]
-    pub fn query_balances_by_owner(
-        &self,
-        app: &App,
-        owner: String,
-        start_after: Option<u64>,
-        limit: Option<u32>,
-    ) -> StdResult<Vec<Balance>> {
-        app.wrap().query_wasm_smart(
-            self.0.clone(),
-            &QueryMsg::BalancesByOwner {
-                owner,
-                start_after,
-                limit,
-            },
-        )
-    }
-
-    #[track_caller]
-    pub fn query_balances_by_id(
-        &self,
-        app: &App,
-        id: u64,
-        start_after: Option<String>,
-        limit: Option<u32>,
-    ) -> StdResult<Vec<Balance>> {
-        app.wrap().query_wasm_smart(
-            self.0.clone(),
-            &QueryMsg::BalancesById {
-                id,
-                start_after,
-                limit,
-            },
         )
     }
 }

@@ -1,16 +1,12 @@
-use cosmwasm_std::{Addr, Deps, Order, StdResult, Uint128};
-use cw_storage_plus::Bound;
+use cosmwasm_std::{Deps, StdResult, Uint128};
 use cw_utils::Expiration;
 
 use crate::{
     helpers::fetch_balance,
     msg::ConfigResponse,
-    state::{approvals, balances, Approval, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
+    state::{TokenInfo, APPROVALS, CONFIG, REGISTERED_TOKENS, TOKENS},
     ContractError,
 };
-
-pub const DEFAULT_LIMIT: u32 = 10;
-pub const MAX_LIMIT: u32 = 50;
 
 // Query contract configuration.
 pub fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
@@ -91,147 +87,9 @@ pub fn query_approved_for_all(
     let operator_addr = deps.api.addr_validate(&operator)?;
 
     // Check if there is an approval for the operator to manage all of the owner's tokens.
-    let expiration = approvals()
-        .may_load(deps.storage, (owner_addr.clone(), operator_addr.clone()))?
-        .map(|approval| approval.expiration);
+    let expiration =
+        APPROVALS.may_load(deps.storage, (owner_addr.clone(), operator_addr.clone()))?;
 
     // Return the approval status.
     Ok(expiration)
-}
-
-// Query the list of operators approved to manage all of an owner's tokens.
-pub fn query_approvals_by_owner(
-    deps: Deps,
-    owner: String,
-    start_after: Option<String>,
-    limit: Option<u32>,
-) -> StdResult<Vec<Approval>> {
-    // Validate the owner's address to ensure it's in a proper format.
-    let owner_addr = deps.api.addr_validate(&owner)?;
-
-    // Determine the start address for the query. This is used for pagination.
-    let start_addr = start_after
-        .map(|addr| deps.api.addr_validate(&addr))
-        .transpose()?;
-
-    // Create a bound for the query based on the owner's address and the start address.
-    let start = start_addr.map(|addr| Bound::<(Addr, Addr)>::exclusive((owner_addr.clone(), addr)));
-
-    // Set a limit for the number of results.
-    // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
-    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
-
-    // Retrieve the list of approvals per owner.
-    let res: Vec<Approval> = approvals()
-        .idx
-        .owner_index
-        .prefix(owner_addr)
-        .range(deps.storage, start, None, Order::Ascending)
-        .take(limit)
-        .flat_map(|tuple| Ok::<Approval, ContractError>(tuple?.1))
-        .collect();
-
-    // Return the list of approvals.
-    Ok(res)
-}
-
-// Query the list of owners who approved the operator to manage all of their tokens.
-pub fn query_approvals_by_operator(
-    deps: Deps,
-    operator: String,
-    start_after: Option<String>,
-    limit: Option<u32>,
-) -> StdResult<Vec<Approval>> {
-    // Validate the operator's address to ensure it's in a proper format.
-    let operator_addr = deps.api.addr_validate(&operator)?;
-
-    // Determine the start address for the query. This is used for pagination.
-    let start_addr = start_after
-        .map(|addr| deps.api.addr_validate(&addr))
-        .transpose()?;
-
-    // Set a limit for the number of results.
-    // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
-    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
-
-    // Create a bound for the query based on the owner's address and the start address.
-    let start =
-        start_addr.map(|addr| Bound::<(Addr, Addr)>::exclusive((addr, operator_addr.clone())));
-
-    // Retrieve the list of approvals per operator.
-    let res: Vec<Approval> = approvals()
-        .idx
-        .operator_index
-        .prefix(operator_addr)
-        .range(deps.storage, start, None, Order::Ascending)
-        .take(limit)
-        .flat_map(|tuple| Ok::<Approval, ContractError>(tuple?.1))
-        .collect();
-
-    // Return the list of approvals.
-    Ok(res)
-}
-
-// Query the list of all token balances by an owner.
-pub fn query_balances_by_owner(
-    deps: Deps,
-    owner: String,
-    start_after: Option<u64>,
-    limit: Option<u32>,
-) -> StdResult<Vec<Balance>> {
-    // Validate the owner's address to ensure it's in a proper format.
-    let owner_addr = deps.api.addr_validate(&owner)?;
-
-    // Set a limit for the number of results.
-    // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
-    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
-
-    // Create a bound for the query based on the owner's address and the start id.
-    let start = start_after.map(|id| Bound::<(Addr, u64)>::exclusive((owner_addr.clone(), id)));
-
-    // Retrieve the list of balances per owner.
-    let res: Vec<Balance> = balances()
-        .idx
-        .owner_index
-        .prefix(owner_addr)
-        .range(deps.storage, start, None, Order::Ascending)
-        .take(limit)
-        .flat_map(|tuple| Ok::<Balance, ContractError>(tuple?.1))
-        .collect();
-
-    // Return the list of approvals.
-    Ok(res)
-}
-
-// Query the list of owners who approved the operator to manage all of their tokens.
-pub fn query_balances_by_id(
-    deps: Deps,
-    id: u64,
-    start_after: Option<String>,
-    limit: Option<u32>,
-) -> StdResult<Vec<Balance>> {
-    // Determine the start address for the query. This is used for pagination.
-    let start_addr = start_after
-        .map(|addr| deps.api.addr_validate(&addr))
-        .transpose()?;
-
-    // Set a limit for the number of results.
-    // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
-    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
-
-    // Create a bound for the query based on the owner's address and the start address.
-    let start = start_addr.map(|addr| Bound::<(Addr, u64)>::exclusive((addr, id)));
-
-    // Retrieve the list of balances per token id.
-    let res: Vec<Balance> = balances()
-        .idx
-        .token_index
-        .prefix(id)
-        .range(deps.storage, start, None, Order::Ascending)
-        .take(limit)
-        .flat_map(|tuple| Ok::<Balance, ContractError>(tuple?.1))
-        .collect();
-
-    // Return the list of approvals.
-    Ok(res)
 }

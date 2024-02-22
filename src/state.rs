@@ -1,7 +1,7 @@
 use cosmwasm_schema::cw_serde;
 
 use cosmwasm_std::{Addr, Uint128};
-use cw_storage_plus::{Index, IndexList, IndexedMap, Item, Map, MultiIndex};
+use cw_storage_plus::{Item, Map};
 use cw_utils::Expiration;
 
 #[cw_serde]
@@ -45,79 +45,8 @@ pub struct TokenInfo {
 /// using a Map is the right way to go.
 pub const TOKENS: Map<u64, TokenInfo> = Map::new("tokens");
 
-#[cw_serde]
-pub struct Balance {
-    /// Owner of the token.
-    pub owner: Addr,
-    /// Identifier of the token.
-    pub id: u64,
-    /// Amount of the token for the owner.
-    pub amount: Uint128,
-}
+// Owner, TokenID, Amount
+pub const BALANCES: Map<(Addr, u64), Uint128> = Map::new("balances");
 
-pub struct BalancesIndexes<'a> {
-    pub owner_index: MultiIndex<'a, Addr, Balance, (Addr, u64)>,
-    pub token_index: MultiIndex<'a, u64, Balance, (Addr, u64)>,
-}
-
-impl<'a> IndexList<Balance> for BalancesIndexes<'a> {
-    fn get_indexes(&'_ self) -> Box<dyn Iterator<Item = &'_ dyn Index<Balance>> + '_> {
-        let v: Vec<&dyn Index<Balance>> = vec![&self.owner_index, &self.token_index];
-        Box::new(v.into_iter())
-    }
-}
-
-pub fn balances<'a>() -> IndexedMap<'a, (Addr, u64), Balance, BalancesIndexes<'a>> {
-    let indexes = BalancesIndexes {
-        owner_index: MultiIndex::new(
-            |_, balance: &Balance| balance.owner.clone(),
-            "balances",
-            "balances__owner",
-        ),
-        token_index: MultiIndex::new(
-            |_, balance: &Balance| balance.id,
-            "balances",
-            "balances__id",
-        ),
-    };
-    IndexedMap::new("balances", indexes)
-}
-
-#[cw_serde]
-pub struct Approval {
-    /// Owner of the token.
-    pub owner: Addr,
-    /// Operator for the token.
-    pub operator: Addr,
-    /// Expiration time or block of the approval.
-    pub expiration: Expiration,
-}
-
-pub struct ApprovalsIndexes<'a> {
-    pub owner_index: MultiIndex<'a, Addr, Approval, (Addr, Addr)>,
-    pub operator_index: MultiIndex<'a, Addr, Approval, (Addr, Addr)>,
-}
-
-impl<'a> IndexList<Approval> for ApprovalsIndexes<'a> {
-    fn get_indexes(&'_ self) -> Box<dyn Iterator<Item = &'_ dyn Index<Approval>> + '_> {
-        let v: Vec<&dyn Index<Approval>> = vec![&self.owner_index, &self.operator_index];
-        Box::new(v.into_iter())
-    }
-}
-
-// Order: (owner, operator)
-pub fn approvals<'a>() -> IndexedMap<'a, (Addr, Addr), Approval, ApprovalsIndexes<'a>> {
-    let indexes = ApprovalsIndexes {
-        owner_index: MultiIndex::new(
-            |_, approval: &Approval| approval.owner.clone(),
-            "approvals",
-            "approvals__owner",
-        ),
-        operator_index: MultiIndex::new(
-            |_, approval: &Approval| approval.operator.clone(),
-            "approvals",
-            "approvals__operator",
-        ),
-    };
-    IndexedMap::new("approvals", indexes)
-}
+// Owner, Address, Expiration
+pub const APPROVALS: Map<(Addr, Addr), Expiration> = Map::new("approvals");

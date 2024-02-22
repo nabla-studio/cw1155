@@ -8,7 +8,7 @@ use crate::{
         BalanceAction,
     },
     receiver::Cw1155ReceiveMsg,
-    state::{approvals, Approval, TokenInfo, CONFIG, TOKENS},
+    state::{TokenInfo, APPROVALS, CONFIG, TOKENS},
     ContractError,
 };
 
@@ -246,14 +246,10 @@ pub fn approve_all(
     }
 
     // Save the new approval.
-    approvals().save(
+    APPROVALS.save(
         deps.storage,
         (info.sender.clone(), operator_addr.clone()),
-        &Approval {
-            owner: info.sender.clone(),
-            operator: operator_addr,
-            expiration,
-        },
+        &expiration,
     )?;
 
     // Prepare the response.
@@ -277,7 +273,7 @@ pub fn revoke_all(
     let operator_addr = deps.api.addr_validate(&operator)?;
 
     // Remove a previous grant.
-    approvals().remove(deps.storage, (info.sender.clone(), operator_addr))?;
+    APPROVALS.remove(deps.storage, (info.sender.clone(), operator_addr));
 
     // Prepare the response.
     let resp = Response::default()

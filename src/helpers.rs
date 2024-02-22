@@ -1,7 +1,7 @@
 use cosmwasm_std::{Addr, Env, Storage, Uint128};
 
 use crate::{
-    state::{approvals, balances, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
+    state::{TokenInfo, APPROVALS, BALANCES, CONFIG, REGISTERED_TOKENS, TOKENS},
     ContractError,
 };
 
@@ -52,8 +52,8 @@ pub fn assert_can_manage(
     }
 
     // Operator can manage only for owners that have already granted him.
-    match approvals().may_load(store, (owner, operator))? {
-        Some(approval) if !approval.expiration.is_expired(&env.block) => Ok(()),
+    match APPROVALS.load(store, (owner, operator)) {
+        Ok(expiration) if !expiration.is_expired(&env.block) => Ok(()),
         _ => Err(ContractError::Unauthorized),
     }
 }
@@ -71,31 +71,27 @@ pub fn update_balance(
     id: u64,
     amount: Uint128,
     action: BalanceAction,
-) -> Result<Balance, ContractError> {
-    balances().update(
+) -> Result<Uint128, ContractError> {
+    BALANCES.update(
         store,
         (addr.clone(), id),
-        |balance: Option<Balance>| -> Result<_, ContractError> {
+        |balance: Option<Uint128>| -> Result<_, ContractError> {
             // If the account has no balance for this token, create it.
-            let mut new_balance: Balance = balance.unwrap_or_else(|| Balance {
-                owner: addr.clone(),
-                amount: Uint128::new(0),
-                id,
-            });
+            let mut new_balance = balance.unwrap_or_default();
 
-            new_balance.amount = match action {
+            new_balance = match action {
                 // Here we do not need to check if the new balance could cause
                 // overflow, since this is checked before calling this
                 // function.
-                BalanceAction::Increase => new_balance.amount + amount,
+                BalanceAction::Increase => new_balance + amount,
                 BalanceAction::Decrease => {
                     // If the account has no sufficient balance, return an
                     // error.
-                    new_balance.amount.checked_sub(amount).map_err(|_| {
+                    new_balance.checked_sub(amount).map_err(|_| {
                         ContractError::InsufficientFunds {
                             id,
                             required: amount,
-                            available: new_balance.amount,
+                            available: new_balance,
                         }
                     })?
                 }
@@ -221,13 +217,8 @@ pub fn fetch_balance(
     id: u64,
 ) -> Result<Uint128, ContractError> {
     // Load the balance of the account for the token.
-    let balance = balances()
-        .may_load(store, (owner_addr.clone(), id))?
-        .unwrap_or(Balance {
-            owner: owner_addr,
-            id,
-            amount: Uint128::new(0),
-        });
+    let balance = BALANCES.load(store, (owner_addr, id)).unwrap_or_default();
+
     // Return the balance
-    Ok(balance.amount)
+    Ok(balance)
 }

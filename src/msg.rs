@@ -2,7 +2,7 @@ use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Binary, Uint128};
 use cw_utils::Expiration;
 
-use crate::state::{Approval, Balance, TokenInfo};
+use crate::state::TokenInfo;
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -125,50 +125,6 @@ pub enum QueryMsg {
     /// the tokens owned by an owner.
     #[returns(Option<Expiration>)]
     IsApprovedForAll { owner: String, operator: String },
-
-    /// List of all approvals by owner
-    #[returns(Vec<Approval>)]
-    ApprovalsByOwner {
-        /// Address of the owner.
-        owner: String,
-        /// Pagination start key.
-        start_after: Option<String>,
-        /// Pagination limit.
-        limit: Option<u32>,
-    },
-
-    /// List of all approvals by operator
-    #[returns(Vec<Approval>)]
-    ApprovalsByOperator {
-        /// Address of the operator.
-        operator: String,
-        /// Pagination start key.
-        start_after: Option<String>,
-        /// Pagination limit.
-        limit: Option<u32>,
-    },
-
-    /// List of all balances by owner
-    #[returns(Vec<Balance>)]
-    BalancesByOwner {
-        /// Address of the owner.
-        owner: String,
-        /// Pagination start key.
-        start_after: Option<u64>,
-        /// Pagination limit.
-        limit: Option<u32>,
-    },
-
-    /// List of all balances by token id
-    #[returns(Vec<Balance>)]
-    BalancesById {
-        /// Id of the token.
-        id: u64,
-        /// Pagination start key.
-        start_after: Option<String>,
-        /// Pagination limit.
-        limit: Option<u32>,
-    },
 
     /// Config returns the current information about the contract and the
     /// related tokens collection.
