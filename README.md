@@ -1,4 +1,4 @@
-# CW1155: Multiple Tokens Manager
+# CW1155: Multiple Tokens Manager  - Light version
 
 CW1155 is an innovative smart contract tailored for the efficient management of
 a wide range of token types within CosmWasm-enabled blockchains. 
@@ -7,6 +7,12 @@ this contract introduces significant enhancements, broadening its functionality
 and utility. Its core objective is to facilitate the management of a variety of
 token types, including fungible, non-fungible, and semi-fungible tokens, 
 through a singular contract instance.
+
+This branch contains a lightweight implementation of the smart contract, which 
+consists of a reduction in the size of the contract, a reduction in the number 
+of operations to be performed and, consequently, a reduction in the cost of 
+gas. Of course, this reduction comes at a price: the lack of some advanced 
+query functionality.
 
 ### Features:
 - **Token Identifier**: Employs integers for seamless token identification, 
@@ -276,38 +282,6 @@ IsApprovedForAll {
 Response:
 ```
 Option<"expiration">
-```
-
-#### ApprovalsByOwner
-
-Get the list of operators authorized to manage all tokens of a given owner.
-
-```
-ApprovalsByOwner {
-    "owner*": "string",
-    "start_after": Option<"string">,
-    "limit": Option<"u32">,
-}
-``` 
-Response:
-```
-array["Approval"]
-```
-
-#### ApprovalsByOperator
-
-Get the list of owners authorizing given operator to manage all their tokens.
-
-```
-ApprovalsByOperator {
-    "operator*": "string",
-    "start_after": Option<"string">,
-    "limit": Option<"u32">,
-}
-``` 
-Response:
-```
-array["Approval"]
 ```
 
 #### Config
