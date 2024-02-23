@@ -248,6 +248,7 @@ Response:
 "integer"
 ```
 
+
 #### BatchBalance
 
 Query the token balances for multiple IDs associated with a single owner.
@@ -261,6 +262,40 @@ BatchBalance {
 Response:
 ```
 array["integer"]
+```
+
+#### BalancesByOwner
+
+Retrieve the token balances for all the Token IDs associated with a single 
+owner. It is paginated. 
+
+```
+Balance { 
+    "owner*": "string", 
+    "start_after": Option<"u64">,
+    "limit": Option<"u32">,
+}
+``` 
+Response:
+```
+array["Balance"]
+```
+
+#### BalancesById
+
+Retrieve the token balances for all the owners associated with a single 
+Token ID. It is paginated. 
+
+```
+Balance { 
+    "ID*": "u64", 
+    "start_after": Option<"u64">,
+    "limit": Option<"u32">,
+}
+``` 
+Response:
+```
+array["Balance"]
 ```
 
 #### IsApprovedForAll
@@ -350,6 +385,9 @@ TokenInfoResponse {
     "current_supply": "integer"
 }
 ```
+
+> *Note:* the deafult limit value for the paginated queries is 10, while the 
+max limit is 50;
 
 ---
 
