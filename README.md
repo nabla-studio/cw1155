@@ -270,7 +270,7 @@ Retrieve the token balances for all the Token IDs associated with a single
 owner. It is paginated. 
 
 ```
-Balance { 
+BalancesByOwner { 
     "owner*": "string", 
     "start_after": Option<"u64">,
     "limit": Option<"u32">,
@@ -287,7 +287,7 @@ Retrieve the token balances for all the owners associated with a single
 Token ID. It is paginated. 
 
 ```
-Balance { 
+BalancesById { 
     "ID*": "u64", 
     "start_after": Option<"u64">,
     "limit": Option<"u32">,
