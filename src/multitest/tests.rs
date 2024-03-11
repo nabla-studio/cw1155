@@ -5,7 +5,7 @@ use cw_multi_test::App;
 use cw_utils::Expiration;
 
 use crate::{
-    msg::ConfigResponse,
+    msg::{ConfigResponse, TokenInfoResponse},
     state::{Approval, Balance, TokenInfo},
     ContractError,
 };
@@ -320,7 +320,11 @@ fn mint() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -334,7 +338,11 @@ fn mint() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     let user_balance = contract
@@ -369,7 +377,11 @@ fn unauthorized_mint() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     let err = contract
@@ -385,7 +397,11 @@ fn unauthorized_mint() {
 
     assert_eq!(err, ContractError::NotMinter);
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     let user_balance = contract
@@ -422,7 +438,11 @@ fn try_overcome_max_supply() {
         .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     let err = contract
@@ -438,7 +458,11 @@ fn try_overcome_max_supply() {
 
     assert_eq!(err, ContractError::CannotExceedMaxSupply);
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 }
 
@@ -469,7 +493,11 @@ fn multiple_mint() {
         .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -483,7 +511,11 @@ fn multiple_mint() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     contract
@@ -497,7 +529,11 @@ fn multiple_mint() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(20u128));
 
     let err = contract
@@ -542,7 +578,11 @@ fn mint_multiple_recipients() {
         .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -556,7 +596,11 @@ fn mint_multiple_recipients() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(8u128));
 
     contract
@@ -570,7 +614,11 @@ fn mint_multiple_recipients() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(20u128));
 
     let recipient1_balance = contract
@@ -849,7 +897,11 @@ fn burn() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -863,7 +915,11 @@ fn burn() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     let user_balance = contract
@@ -886,7 +942,7 @@ fn burn() {
         current_supply,
         burned,
         ..
-    } = contract.query_token_info(&app, 1).unwrap();
+    } = contract.query_token_info(&app, 1).unwrap().info;
     assert_eq!(current_supply, Uint128::from(7u128));
     assert_eq!(burned, Uint128::from(3u128));
 
@@ -922,7 +978,11 @@ fn unauthorized_burn() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -936,7 +996,11 @@ fn unauthorized_burn() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     let user_balance = contract
@@ -961,7 +1025,7 @@ fn unauthorized_burn() {
         current_supply,
         burned,
         ..
-    } = contract.query_token_info(&app, 1).unwrap();
+    } = contract.query_token_info(&app, 1).unwrap().info;
     assert_eq!(current_supply, Uint128::from(10u128));
     assert_eq!(burned, Uint128::zero());
 
@@ -996,7 +1060,11 @@ fn insufficient_burn() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     let err = contract
@@ -1038,7 +1106,11 @@ fn approved_burn() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1052,7 +1124,11 @@ fn approved_burn() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     let user_balance = contract
@@ -1084,7 +1160,7 @@ fn approved_burn() {
         current_supply,
         burned,
         ..
-    } = contract.query_token_info(&app, 1).unwrap();
+    } = contract.query_token_info(&app, 1).unwrap().info;
     assert_eq!(current_supply, Uint128::from(7u128));
     assert_eq!(burned, Uint128::from(3u128));
 
@@ -1120,7 +1196,11 @@ fn too_much_to_burn() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1145,7 +1225,11 @@ fn too_much_to_burn() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(50u128));
 
     let user_balance = contract
@@ -1177,7 +1261,7 @@ fn too_much_to_burn() {
         current_supply,
         burned,
         ..
-    } = contract.query_token_info(&app, 1).unwrap();
+    } = contract.query_token_info(&app, 1).unwrap().info;
     assert_eq!(current_supply, Uint128::from(50u128));
     assert_eq!(burned, Uint128::zero());
 
@@ -1216,7 +1300,11 @@ fn transfer_from() {
         .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1230,7 +1318,11 @@ fn transfer_from() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     contract
@@ -1249,7 +1341,7 @@ fn transfer_from() {
         current_supply,
         burned,
         ..
-    } = contract.query_token_info(&app, 1).unwrap();
+    } = contract.query_token_info(&app, 1).unwrap().info;
     assert_eq!(current_supply, Uint128::from(10u128));
     assert_eq!(burned, Uint128::zero());
 
@@ -1294,7 +1386,11 @@ fn unauthorized_transfer_from() {
         .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1308,7 +1404,11 @@ fn unauthorized_transfer_from() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     let err = contract
@@ -1360,7 +1460,11 @@ fn unallowed_transfer_from() {
         .register(&mut app, &sender, Uint128::from(20u128), false)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1374,7 +1478,11 @@ fn unallowed_transfer_from() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     let err = contract
@@ -1426,7 +1534,11 @@ fn authorized_transfer_from() {
         .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1440,7 +1552,11 @@ fn authorized_transfer_from() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     contract
@@ -1505,7 +1621,11 @@ fn too_much_to_transfer_from() {
         .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1519,7 +1639,11 @@ fn too_much_to_transfer_from() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     let err = contract
@@ -1572,7 +1696,11 @@ fn transfer_zero() {
         .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1586,7 +1714,11 @@ fn transfer_zero() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     let err = contract
@@ -1643,7 +1775,11 @@ fn auto_transfer() {
         .register(&mut app, &sender, Uint128::from(20u128), None)
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1657,7 +1793,11 @@ fn auto_transfer() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     contract
@@ -1705,7 +1845,11 @@ fn set_minter_mint() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1719,7 +1863,11 @@ fn set_minter_mint() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     let user_balance = contract
@@ -1743,7 +1891,11 @@ fn set_minter_mint() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(20u128));
 
     let user_balance = contract
@@ -1792,7 +1944,11 @@ fn unauthorized_set_minter() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1831,7 +1987,11 @@ fn set_minter_none() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     let err = contract.set_minter(&mut app, &sender, None).unwrap_err();
@@ -1875,7 +2035,11 @@ fn set_owner_register() {
 
     contract.register(&mut app, &owner, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 2).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 2)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 }
 
@@ -1961,7 +2125,11 @@ fn mint_disable_minting() {
     contract.register(&mut app, &sender, None, None).unwrap();
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -1975,7 +2143,11 @@ fn mint_disable_minting() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     contract
@@ -2028,7 +2200,11 @@ fn mint_burn_disable_minting() {
     contract.register(&mut app, &sender, None, None).unwrap();
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -2042,7 +2218,11 @@ fn mint_burn_disable_minting() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     contract
@@ -2105,7 +2285,11 @@ fn mint_disable_minting_burn() {
     contract.register(&mut app, &sender, None, None).unwrap();
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -2119,7 +2303,11 @@ fn mint_disable_minting_burn() {
         )
         .unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::from(10u128));
 
     contract
@@ -2275,11 +2463,23 @@ fn batch_balances() {
 
     contract.register(&mut app, &sender, None, None).unwrap();
 
-    let current_supply = contract.query_token_info(&app, 1).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 1)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
-    let current_supply = contract.query_token_info(&app, 2).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 2)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
-    let current_supply = contract.query_token_info(&app, 3).unwrap().current_supply;
+    let current_supply = contract
+        .query_token_info(&app, 3)
+        .unwrap()
+        .info
+        .current_supply;
     assert_eq!(current_supply, Uint128::zero());
 
     contract
@@ -2864,5 +3064,150 @@ fn get_balances_by_id() {
                 amount: Uint128::from(33u128)
             },
         ]
+    );
+}
+
+#[test]
+fn get_tokens_info() {
+    let sender = Addr::unchecked("sender");
+
+    let mut app = App::default();
+
+    let code_id = Cw1155::store_code(&mut app);
+
+    let contract = Cw1155::instantiate(
+        &mut app,
+        code_id,
+        &sender,
+        "CW1155 nabla collection",
+        None,
+        METADATA_URI,
+        None,
+        None,
+        NAME,
+        DESCRIPTION,
+    )
+    .unwrap();
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let single_token_info = contract.query_tokens_info(&app, None, None).unwrap();
+
+    assert_eq!(
+        single_token_info,
+        vec![TokenInfoResponse {
+            id: 1,
+            info: TokenInfo {
+                is_transferable: true,
+                max_supply: None,
+                burned: Uint128::zero(),
+                current_supply: Uint128::zero()
+            }
+        }]
+    );
+
+    contract.register(&mut app, &sender, None, None).unwrap();
+    contract.register(&mut app, &sender, None, None).unwrap();
+
+    let all_tokens_info = contract.query_tokens_info(&app, None, None).unwrap();
+
+    assert_eq!(
+        all_tokens_info,
+        vec![
+            TokenInfoResponse {
+                id: 1,
+                info: TokenInfo {
+                    is_transferable: true,
+                    max_supply: None,
+                    burned: Uint128::zero(),
+                    current_supply: Uint128::zero()
+                }
+            },
+            TokenInfoResponse {
+                id: 2,
+                info: TokenInfo {
+                    is_transferable: true,
+                    max_supply: None,
+                    burned: Uint128::zero(),
+                    current_supply: Uint128::zero()
+                }
+            },
+            TokenInfoResponse {
+                id: 3,
+                info: TokenInfo {
+                    is_transferable: true,
+                    max_supply: None,
+                    burned: Uint128::zero(),
+                    current_supply: Uint128::zero()
+                }
+            }
+        ]
+    );
+
+    let first_two_tokens_info = contract.query_tokens_info(&app, None, Some(2)).unwrap();
+
+    assert_eq!(
+        first_two_tokens_info,
+        vec![
+            TokenInfoResponse {
+                id: 1,
+                info: TokenInfo {
+                    is_transferable: true,
+                    max_supply: None,
+                    burned: Uint128::zero(),
+                    current_supply: Uint128::zero()
+                }
+            },
+            TokenInfoResponse {
+                id: 2,
+                info: TokenInfo {
+                    is_transferable: true,
+                    max_supply: None,
+                    burned: Uint128::zero(),
+                    current_supply: Uint128::zero()
+                }
+            },
+        ]
+    );
+
+    let last_two_tokens_info = contract.query_tokens_info(&app, Some(1), None).unwrap();
+
+    assert_eq!(
+        last_two_tokens_info,
+        vec![
+            TokenInfoResponse {
+                id: 2,
+                info: TokenInfo {
+                    is_transferable: true,
+                    max_supply: None,
+                    burned: Uint128::zero(),
+                    current_supply: Uint128::zero()
+                }
+            },
+            TokenInfoResponse {
+                id: 3,
+                info: TokenInfo {
+                    is_transferable: true,
+                    max_supply: None,
+                    burned: Uint128::zero(),
+                    current_supply: Uint128::zero()
+                }
+            },
+        ]
+    );
+
+    let second_token_info = contract.query_tokens_info(&app, Some(1), Some(1)).unwrap();
+
+    assert_eq!(
+        second_token_info,
+        vec![TokenInfoResponse {
+            id: 2,
+            info: TokenInfo {
+                is_transferable: true,
+                max_supply: None,
+                burned: Uint128::zero(),
+                current_supply: Uint128::zero()
+            }
+        },]
     );
 }

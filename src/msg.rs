@@ -176,8 +176,18 @@ pub enum QueryMsg {
     Config {},
 
     /// TokenInfo returns the information about a specific token.
-    #[returns(TokenInfo)]
+    #[returns(TokenInfoResponse)]
     TokenInfo { id: u64 },
+
+    /// TokensInfo returns the information about a list of tokens iterated from
+    /// a start_after key.
+    #[returns(Vec<TokenInfoResponse>)]
+    TokensInfo {
+        /// Pagination start key.
+        start_after: Option<u64>,
+        /// Pagination limit.
+        limit: Option<u32>,
+    },
 }
 /// ConfigResponse holds basic contract information.
 #[cw_serde]
@@ -199,4 +209,12 @@ pub struct ConfigResponse {
 
     /// Collection description.
     pub description: String,
+}
+
+#[cw_serde]
+pub struct TokenInfoResponse {
+    /// Token identifier.
+    pub id: u64,
+    /// Token information.
+    pub info: TokenInfo,
 }

@@ -4,8 +4,8 @@ use cw_utils::Expiration;
 
 use crate::{
     helpers::fetch_balance,
-    msg::ConfigResponse,
-    state::{approvals, balances, Approval, Balance, TokenInfo, CONFIG, REGISTERED_TOKENS, TOKENS},
+    msg::{ConfigResponse, TokenInfoResponse},
+    state::{approvals, balances, Approval, Balance, CONFIG, REGISTERED_TOKENS, TOKENS},
     ContractError,
 };
 
@@ -31,12 +31,39 @@ pub fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
 }
 
 // Query information about a specific token.
-pub fn query_token_info(deps: Deps, id: u64) -> Result<TokenInfo, ContractError> {
+pub fn query_token_info(deps: Deps, id: u64) -> Result<TokenInfoResponse, ContractError> {
     // Load token information by token ID from the storage.
     match TOKENS.may_load(deps.storage, id)? {
-        Some(token_info) => Ok(token_info),
+        Some(token_info) => Ok(TokenInfoResponse {
+            id,
+            info: token_info,
+        }),
         None => Err(ContractError::InvalidToken { id }),
     }
+}
+
+// Query information about a list of token iterated from start_after.
+pub fn query_tokens_info(
+    deps: Deps,
+    start_after: Option<u64>,
+    limit: Option<u32>,
+) -> StdResult<Vec<TokenInfoResponse>> {
+    // Create a bound for the query based on the tokens start id.
+    let start = start_after.map(Bound::<u64>::exclusive);
+
+    // Set a limit for the number of results.
+    // If the limit is not specified, use DEFAULT_LIMIT. Ensure it does not exceed MAX_LIMIT.
+    let limit = limit.unwrap_or(DEFAULT_LIMIT).min(MAX_LIMIT) as usize;
+
+    // Load token information by token ID for the tokens list from the storage.
+    let res = TOKENS
+        .range(deps.storage, start, None, Order::Ascending)
+        .take(limit)
+        .filter_map(|result| result.ok())
+        .map(|(id, info)| TokenInfoResponse { id, info })
+        .collect::<Vec<_>>();
+
+    Ok(res)
 }
 
 // Query the balance of a specific token for a given owner.
