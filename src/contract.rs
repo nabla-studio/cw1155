@@ -105,5 +105,8 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, ContractErr
         )?),
         QueryMsg::Config {} => Ok(to_json_binary(&query::query_config(deps)?)?),
         QueryMsg::TokenInfo { id } => Ok(to_json_binary(&query::query_token_info(deps, id)?)?),
+        QueryMsg::TokensInfo { start_after, limit } => Ok(to_json_binary(
+            &query::query_tokens_info(deps, start_after, limit)?,
+        )?),
     }
 }

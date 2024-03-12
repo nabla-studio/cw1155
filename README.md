@@ -318,12 +318,34 @@ TokenInfo {
 Response:
 ```
 TokenInfoResponse {
-    "is_trasferrable": "boolean",
-    "max_supply": "integer",
-    "burned": "integer",
-    "current_supply": "integer"
+    "id": "integer",
+    "info": TokenInfo {
+        "is_trasferrable": "boolean",
+        "max_supply": "integer",
+        "burned": "integer",
+        "current_supply": "integer"
+    }
 }
 ```
+
+#### TokensInfo
+
+Fetch details about a list of tokens, including their transferability, maximum 
+supply, burned quantity, and current supply.
+
+```
+TokensInfo {
+    "start_after": Option<"integer">,
+    "limit": Option<"integer">,
+}
+```
+Response:
+```
+array["TokenInfoResponse"]
+```
+
+> *Note:* the deafult limit value for the paginated queries is 10, while the 
+max limit is 50;
 
 ---
 

@@ -3,8 +3,7 @@ use cw_multi_test::{App, ContractWrapper, Executor};
 use cw_utils::Expiration;
 
 use crate::contract::{execute, instantiate, query};
-use crate::msg::{ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::TokenInfo;
+use crate::msg::{ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg, TokenInfoResponse};
 use crate::ContractError;
 
 pub struct Cw1155(Addr);
@@ -275,9 +274,20 @@ impl Cw1155 {
     }
 
     #[track_caller]
-    pub fn query_token_info(&self, app: &App, id: u64) -> StdResult<TokenInfo> {
+    pub fn query_token_info(&self, app: &App, id: u64) -> StdResult<TokenInfoResponse> {
         app.wrap()
             .query_wasm_smart(self.0.clone(), &QueryMsg::TokenInfo { id })
+    }
+
+    #[track_caller]
+    pub fn query_tokens_info(
+        &self,
+        app: &App,
+        start_after: Option<u64>,
+        limit: Option<u32>,
+    ) -> StdResult<Vec<TokenInfoResponse>> {
+        app.wrap()
+            .query_wasm_smart(self.0.clone(), &QueryMsg::TokensInfo { start_after, limit })
     }
 
     #[track_caller]
