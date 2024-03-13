@@ -15,10 +15,10 @@ pub enum ContractError {
     #[error("Caller is not the contract's current owner")]
     NotOwner,
 
-    #[error("Contract ownership has been renounced")]
+    #[error("Contract ability to mint has been disabled")]
     NoMinter,
 
-    #[error("Caller is not the contract's current owner")]
+    #[error("Caller is not the contract's current minter")]
     NotMinter,
 
     #[error("Token is already registered")]
